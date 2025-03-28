@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bot, Mic, MicOff, Send, X, Maximize2, Minimize2, Volume2, VolumeX } from 'lucide-react';
+import { Bot, Mic, MicOff, Send, X, Maximize2, Minimize2, Volume2, VolumeX, Globe } from 'lucide-react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 interface Message {
@@ -15,6 +16,7 @@ interface AIAssistantProps {
 }
 
 const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -52,7 +54,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
         {
           id: 'welcome',
           type: 'assistant',
-          content: "Hi! I'm your AI assistant. I can help you with content creation, scheduling, and platform setup. What would you like to know?",
+          content: t('ai.assistant.welcome'),
           timestamp: new Date(),
         },
       ]);
@@ -79,9 +81,12 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
   const startListening = () => {
     if (browserSupportsSpeechRecognition) {
       resetTranscript();
-      SpeechRecognition.startListening({ continuous: true });
+      SpeechRecognition.startListening({ 
+        continuous: true,
+        language: i18n.language // Use current language for speech recognition
+      });
     } else {
-      toast.error('Speech recognition is not supported in your browser');
+      toast.error(t('ai.assistant.speechNotSupported'));
     }
   };
 
@@ -97,6 +102,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
     if (!isSpeaking) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = i18n.language; // Use current language for speech synthesis
     utterance.rate = 1;
     utterance.pitch = 1;
     window.speechSynthesis.speak(utterance);
@@ -138,8 +144,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
         }
       }
 
-      // Simulate AI response
-      const response = await simulateAIResponse(command);
+      // Simulate AI response in current language
+      const response = await simulateAIResponse(command, i18n.language);
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -154,33 +160,35 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
         speak(response);
       }
     } catch (error) {
-      toast.error('Failed to process your request');
+      toast.error(t('ai.assistant.error'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const simulateAIResponse = async (command: string): Promise<string> => {
+  const simulateAIResponse = async (command: string, language: string): Promise<string> => {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    // In production, this would call your AI service with the user's preferred language
+    // For now, we'll use translations
     if (command.includes('help')) {
-      return 'I can help you with:\n- Content creation\n- Post scheduling\n- Analytics insights\n- Platform setup\n- Integration management\nJust ask me what you need!';
+      return t('ai.assistant.helpResponse');
     }
 
     if (command.includes('schedule') || command.includes('post')) {
-      return "I'll help you schedule that post. Would you like me to show you how to use the content calendar?";
+      return t('ai.assistant.scheduleResponse');
     }
 
     if (command.includes('analytics') || command.includes('performance')) {
-      return 'I can help you analyze your content performance. What metrics would you like to see?';
+      return t('ai.assistant.analyticsResponse');
     }
 
     if (command.includes('integration') || command.includes('connect')) {
-      return "I'll guide you through setting up integrations. Which platform would you like to connect?";
+      return t('ai.assistant.integrationResponse');
     }
 
-    return "I understand you need assistance. Could you please provide more details about what you'd like to do?";
+    return t('ai.assistant.defaultResponse');
   };
 
   return (
@@ -189,7 +197,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
       <button
         onClick={handleToggle}
         className={`fixed bottom-4 right-4 p-4 rounded-full shadow-lg transition-colors duration-300 ${
-          isOpen ? 'bg-red-500 hover:bg-red-600' : 'bg-[#00E5BE] hover:bg-[#00D1AD]'
+          isOpen ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
         }`}
       >
         {isOpen ? (
@@ -209,8 +217,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
-              <Bot className="w-6 h-6 text-[#00E5BE]" />
-              <h3 className="font-semibold text-gray-900">AI Assistant</h3>
+              <Bot className="w-6 h-6 text-blue-500" />
+              <h3 className="font-semibold text-gray-900">{t('ai.assistant.title')}</h3>
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -246,7 +254,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
                     message.type === 'user'
-                      ? 'bg-[#00E5BE] text-white'
+                      ? 'bg-blue-500 text-white'
                       : 'bg-gray-100 text-gray-900'
                   }`}
                 >
@@ -276,8 +284,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
                   value={input}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
-                  placeholder="Type your message..."
-                  className="w-full px-4 py-2 pr-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent resize-none overflow-hidden"
+                  placeholder={t('ai.assistant.placeholder')}
+                  className="w-full px-4 py-2 pr-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
                   rows={1}
                   style={{ maxHeight: '120px' }}
                 />
@@ -297,7 +305,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
-                className="p-2 bg-[#00E5BE] text-white rounded-lg hover:bg-[#00D1AD] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="w-5 h-5" />
               </button>

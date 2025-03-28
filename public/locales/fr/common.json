@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "login": "Connexion",
+    "getStarted": "Commencer",
+    "dashboard": "Tableau de bord"
+  },
+  "auth": {
+    "login": {
+      "title": "Bon retour",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "signUp": "Inscrivez-vous gratuitement",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "rememberMe": "Se souvenir de moi",
+      "forgotPassword": "Mot de passe oublié ?",
+      "signIn": "Se connecter",
+      "signingIn": "Connexion en cours..."
+    },
+    "signup": {
+      "title": "Créez votre compte",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signIn": "Se connecter",
+      "name": "Nom complet",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "createAccount": "Créer un compte",
+      "creatingAccount": "Création du compte..."
+    }
+  },
+  "ai": {
+    "assistant": {
+      "welcome": "Bonjour ! Je suis votre assistant IA. Comment puis-je vous aider aujourd'hui ?",
+      "placeholder": "Écrivez votre message...",
+      "generating": "Génération de la réponse...",
+      "error": "Désolé, je n'ai pas pu traiter cette demande. Veuillez réessayer."
+    },
+    "generation": {
+      "title": "Génération de Contenu IA",
+      "topic": "Sujet",
+      "industry": "Industrie",
+      "keywords": "Mots-clés",
+      "generate": "Générer du Contenu",
+      "generating": "Génération du contenu...",
+      "humanize": "Humaniser le contenu",
+      "error": "Échec de la génération du contenu"
+    }
+  },
+  "content": {
+    "moderation": {
+      "alert": "Alerte de Modération de Contenu",
+      "suspended": "Votre contenu a été suspendu",
+      "banned": "Votre contenu a été banni",
+      "violations": "Violations détectées",
+      "appeal": "Soumettre un Appel",
+      "appealReason": "Motif de l'Appel",
+      "submitAppeal": "Soumettre l'Appel",
+      "submittingAppeal": "Soumission de l'appel..."
+    }
+  }
+}

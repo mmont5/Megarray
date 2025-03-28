@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "features": "Características",
+    "pricing": "Precios",
+    "login": "Iniciar sesión",
+    "getStarted": "Comenzar",
+    "dashboard": "Panel de control"
+  },
+  "auth": {
+    "login": {
+      "title": "Bienvenido de nuevo",
+      "noAccount": "¿No tienes una cuenta?",
+      "signUp": "Regístrate gratis",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "rememberMe": "Recordarme",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "signIn": "Iniciar sesión",
+      "signingIn": "Iniciando sesión..."
+    },
+    "signup": {
+      "title": "Crea tu cuenta",
+      "haveAccount": "¿Ya tienes una cuenta?",
+      "signIn": "Iniciar sesión",
+      "name": "Nombre completo",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "createAccount": "Crear cuenta",
+      "creatingAccount": "Creando cuenta..."
+    }
+  },
+  "ai": {
+    "assistant": {
+      "welcome": "¡Hola! Soy tu asistente de IA. ¿En qué puedo ayudarte hoy?",
+      "placeholder": "Escribe tu mensaje...",
+      "generating": "Generando respuesta...",
+      "error": "Lo siento, no pude procesar esa solicitud. Por favor, inténtalo de nuevo."
+    },
+    "generation": {
+      "title": "Generación de Contenido IA",
+      "topic": "Tema",
+      "industry": "Industria",
+      "keywords": "Palabras clave",
+      "generate": "Generar Contenido",
+      "generating": "Generando contenido...",
+      "humanize": "Humanizar contenido",
+      "error": "Error al generar contenido"
+    }
+  },
+  "content": {
+    "moderation": {
+      "alert": "Alerta de Moderación de Contenido",
+      "suspended": "Tu contenido ha sido suspendido",
+      "banned": "Tu contenido ha sido bloqueado",
+      "violations": "Violaciones detectadas",
+      "appeal": "Presentar Apelación",
+      "appealReason": "Motivo de la Apelación",
+      "submitAppeal": "Enviar Apelación",
+      "submittingAppeal": "Enviando apelación..."
+    }
+  }
+}

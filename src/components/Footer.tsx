@@ -1,79 +1,163 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Grid,
+  Link,
+  Stack,
+  Typography,
+  useTheme
+} from '@mui/material';
 
 const Footer = () => {
+  const theme = useTheme();
+
+  const sections = [
+    {
+      title: 'Product',
+      links: [
+        { label: 'Features', path: '/features' },
+        { label: 'Pricing', path: '/pricing' },
+        { label: 'Roadmap', path: '/roadmap' },
+      ]
+    },
+    {
+      title: 'Company',
+      links: [
+        { label: 'About', path: '/about' },
+        { label: 'Contact', path: '/contact' },
+        { label: 'Careers', path: '/careers' },
+      ]
+    },
+    {
+      title: 'Resources',
+      links: [
+        { label: 'Blog', path: '/blog' },
+        { label: 'Documentation', path: '/docs' },
+        { label: 'Support', path: '/support' },
+      ]
+    },
+    {
+      title: 'Legal',
+      links: [
+        { label: 'Privacy Policy', path: '/privacy' },
+        { label: 'Terms of Service', path: '/terms' },
+        { label: 'Cookie Policy', path: '/cookies' },
+      ]
+    },
+  ];
+
   return (
-    <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Megarray</h3>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              AI-powered marketing platform for businesses and agencies.
-            </p>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Product</h3>
-            <ul className="mt-4 space-y-2">
-              <li>
-                <Link to="/features" className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Features
-                </Link>
-              </li>
-              <li>
-                <Link to="/pricing" className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Pricing
-                </Link>
-              </li>
-            </ul>
-          </div>
+    <Box 
+      component="footer" 
+      sx={{
+        py: 8,
+        backgroundColor: 'background.paper',
+        borderTop: 1,
+        borderColor: 'divider'
+      }}
+    >
+      <Container maxWidth="lg">
+        <Grid container spacing={8}>
+          <Grid item xs={12} md={4}>
+            <Stack spacing={2}>
+              <Typography
+                variant="h6"
+                component={RouterLink}
+                to="/"
+                sx={{
+                  color: 'primary.main',
+                  textDecoration: 'none',
+                  fontWeight: 'bold'
+                }}
+              >
+                Megarray
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                AI-powered marketing platform for businesses and agencies.
+                Create, schedule, and analyze your content with advanced AI technology.
+              </Typography>
+            </Stack>
+          </Grid>
 
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Company</h3>
-            <ul className="mt-4 space-y-2">
-              <li>
-                <Link to="/contact" className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy" className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Terms of Service
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {sections.map((section) => (
+            <Grid item xs={6} sm={3} md={2} key={section.title}>
+              <Typography
+                variant="subtitle2"
+                color="text.primary"
+                sx={{ mb: 2, fontWeight: 'bold' }}
+              >
+                {section.title}
+              </Typography>
+              <Stack spacing={1}>
+                {section.links.map((link) => (
+                  <Link
+                    key={link.path}
+                    component={RouterLink}
+                    to={link.path}
+                    color="text.secondary"
+                    sx={{
+                      textDecoration: 'none',
+                      '&:hover': { color: 'primary.main' }
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
 
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Connect</h3>
-            <ul className="mt-4 space-y-2">
-              <li>
-                <a href="https://twitter.com/megarray" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Twitter
-                </a>
-              </li>
-              <li>
-                <a href="https://linkedin.com/company/megarray" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
-                  LinkedIn
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-        
-        <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
-          <p className="text-gray-600 dark:text-gray-400 text-center">
+        <Box
+          sx={{
+            mt: 8,
+            pt: 4,
+            borderTop: 1,
+            borderColor: 'divider',
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 2
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
             © {new Date().getFullYear()} Megarray. All rights reserved.
-          </p>
-        </div>
-      </div>
-    </footer>
+          </Typography>
+          <Stack direction="row" spacing={4}>
+            <Link
+              href="https://twitter.com/megarray"
+              target="_blank"
+              rel="noopener"
+              color="text.secondary"
+              sx={{ '&:hover': { color: 'primary.main' } }}
+            >
+              Twitter
+            </Link>
+            <Link
+              href="https://github.com/megarray"
+              target="_blank"
+              rel="noopener"
+              color="text.secondary"
+              sx={{ '&:hover': { color: 'primary.main' } }}
+            >
+              GitHub
+            </Link>
+            <Link
+              href="https://linkedin.com/company/megarray"
+              target="_blank"
+              rel="noopener"
+              color="text.secondary"
+              sx={{ '&:hover': { color: 'primary.main' } }}
+            >
+              LinkedIn
+            </Link>
+          </Stack>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

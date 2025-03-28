@@ -86,12 +86,14 @@ const features = [
 
 const Pricing = () => {
   return (
-    <div className="bg-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900">Simple, transparent pricing</h1>
-          <p className="mt-4 text-xl text-gray-600">
-            Choose the plan that best fits your needs
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Simple, transparent pricing
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Choose the plan that best fits your needs. All plans include a 14-day free trial.
           </p>
         </div>
 
@@ -99,7 +101,7 @@ const Pricing = () => {
         <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
             <div key={index} className="text-center">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto rounded-xl bg-[#00E5BE]/10 text-[#00E5BE]">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto rounded-xl bg-primary-50 text-primary-600">
                 {feature.icon}
               </div>
               <h3 className="mt-4 text-lg font-semibold text-gray-900">{feature.title}</h3>
@@ -114,13 +116,13 @@ const Pricing = () => {
             <div
               key={plan.id}
               className={`relative p-8 rounded-2xl bg-white border-2 
-                ${plan.popular ? 'border-[#00E5BE]' : 'border-gray-100'} 
-                shadow-xl hover:border-[#00E5BE] hover:shadow-2xl hover:-translate-y-1 
+                ${plan.popular ? 'border-primary-500 shadow-primary-100' : 'border-gray-100'} 
+                shadow-xl hover:shadow-2xl hover:-translate-y-1 
                 transition-all duration-300`}
             >
               {plan.popular && (
                 <div className="absolute top-0 right-0 -translate-y-1/2 px-4 py-1 
-                  bg-[#00E5BE] text-white text-sm font-semibold rounded-full">
+                  bg-primary-500 text-white text-sm font-semibold rounded-full">
                   Popular
                 </div>
               )}
@@ -141,7 +143,7 @@ const Pricing = () => {
               <ul className="mt-6 space-y-4">
                 {plan.features.map((feature, index) => (
                   <li key={index} className="flex items-start">
-                    <Check className="w-5 h-5 text-[#00E5BE] shrink-0" />
+                    <Check className="w-5 h-5 text-primary-500 shrink-0" />
                     <span className="ml-3 text-gray-600">{feature}</span>
                   </li>
                 ))}
@@ -151,7 +153,7 @@ const Pricing = () => {
                 <Link
                   to="/contact"
                   className="mt-8 block w-full py-3 px-4 rounded-lg text-center font-semibold 
-                    bg-gray-100 text-gray-900 hover:bg-gray-200 transition-colors duration-300"
+                    bg-gray-100 text-gray-900 hover:bg-gray-200 transition-colors duration-200"
                 >
                   Contact Sales
                 </Link>
@@ -160,9 +162,9 @@ const Pricing = () => {
                   to="/signup"
                   className={`mt-8 block w-full py-3 px-4 rounded-lg text-center font-semibold 
                     ${plan.popular 
-                      ? 'bg-[#00E5BE] text-white hover:bg-[#00D1AD]' 
+                      ? 'bg-primary-500 text-white hover:bg-primary-600' 
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'} 
-                    transition-colors duration-300`}
+                    transition-colors duration-200`}
                 >
                   Get Started
                 </Link>
@@ -173,10 +175,12 @@ const Pricing = () => {
 
         {/* FAQ Section */}
         <div className="mt-24">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-gray-900">Frequently asked questions</h2>
-            <dl className="mt-8 space-y-6">
-              <div>
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+              Frequently asked questions
+            </h2>
+            <dl className="space-y-8">
+              <div className="bg-white rounded-xl p-6 shadow-soft">
                 <dt className="text-lg font-semibold text-gray-900">
                   Can I change plans later?
                 </dt>
@@ -184,7 +188,7 @@ const Pricing = () => {
                   Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle.
                 </dd>
               </div>
-              <div>
+              <div className="bg-white rounded-xl p-6 shadow-soft">
                 <dt className="text-lg font-semibold text-gray-900">
                   What payment methods do you accept?
                 </dt>
@@ -192,20 +196,12 @@ const Pricing = () => {
                   We accept all major credit cards, Apple Pay, Google Pay, and cryptocurrency (ETH, USDC, BTC, MATIC).
                 </dd>
               </div>
-              <div>
+              <div className="bg-white rounded-xl p-6 shadow-soft">
                 <dt className="text-lg font-semibold text-gray-900">
                   What happens if I exceed my plan limits?
                 </dt>
                 <dd className="mt-2 text-gray-600">
                   You'll be notified when you're approaching your limits. You can choose to upgrade your plan or purchase additional credits as needed.
-                </dd>
-              </div>
-              <div>
-                <dt className="text-lg font-semibold text-gray-900">
-                  Do you offer custom solutions?
-                </dt>
-                <dd className="mt-2 text-gray-600">
-                  Yes, our Enterprise plan offers custom solutions tailored to your organization's needs, including custom AI models, dedicated support, and advanced security features.
                 </dd>
               </div>
             </dl>
@@ -215,13 +211,13 @@ const Pricing = () => {
         {/* CTA Section */}
         <div className="mt-16">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-gray-900">Still have questions?</h2>
-            <p className="mt-4 text-gray-600">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Still have questions?</h2>
+            <p className="text-xl text-gray-600 mb-8">
               Contact our sales team for custom pricing options or any other questions.
             </p>
             <Link
               to="/contact"
-              className="mt-8 inline-flex items-center px-6 py-3 rounded-lg text-white bg-[#00E5BE] hover:bg-[#00D1AD] transition-colors duration-300"
+              className="inline-flex items-center px-6 py-3 rounded-lg text-white bg-primary-500 hover:bg-primary-600 transition-colors duration-200"
             >
               Contact Sales
               <ArrowRight className="ml-2 w-5 h-5" />

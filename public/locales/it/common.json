@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "features": "Funzionalità",
+    "pricing": "Prezzi",
+    "login": "Accedi",
+    "getStarted": "Inizia",
+    "dashboard": "Dashboard"
+  },
+  "auth": {
+    "login": {
+      "title": "Bentornato",
+      "noAccount": "Non hai un account?",
+      "signUp": "Registrati gratuitamente",
+      "email": "Indirizzo email",
+      "password": "Password",
+      "rememberMe": "Ricordami",
+      "forgotPassword": "Password dimenticata?",
+      "signIn": "Accedi",
+      "signingIn": "Accesso in corso..."
+    },
+    "signup": {
+      "title": "Crea il tuo account",
+      "haveAccount": "Hai già un account?",
+      "signIn": "Accedi",
+      "name": "Nome completo",
+      "email": "Indirizzo email",
+      "password": "Password",
+      "confirmPassword": "Conferma password",
+      "createAccount": "Crea account",
+      "creatingAccount": "Creazione account in corso..."
+    }
+  },
+  "ai": {
+    "assistant": {
+      "welcome": "Ciao! Sono il tuo assistente AI. Come posso aiutarti oggi?",
+      "placeholder": "Scrivi il tuo messaggio...",
+      "generating": "Generazione risposta...",
+      "error": "Spiacente, non ho potuto elaborare questa richiesta. Riprova."
+    },
+    "generation": {
+      "title": "Generazione Contenuti AI",
+      "topic": "Argomento",
+      "industry": "Settore",
+      "keywords": "Parole chiave",
+      "generate": "Genera Contenuto",
+      "generating": "Generazione contenuto...",
+      "humanize": "Umanizza contenuto",
+      "error": "Errore nella generazione del contenuto"
+    }
+  },
+  "content": {
+    "moderation": {
+      "alert": "Avviso Moderazione Contenuti",
+      "suspended": "Il tuo contenuto è stato sospeso",
+      "banned": "Il tuo contenuto è stato bannato",
+      "violations": "Violazioni rilevate",
+      "appeal": "Presenta Ricorso",
+      "appealReason": "Motivo del Ricorso",
+      "submitAppeal": "Invia Ricorso",
+      "submittingAppeal": "Invio ricorso in corso..."
+    }
+  }
+}

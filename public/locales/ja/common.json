@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "features": "機能",
+    "pricing": "料金",
+    "login": "ログイン",
+    "getStarted": "始める",
+    "dashboard": "ダッシュボード"
+  },
+  "auth": {
+    "login": {
+      "title": "おかえりなさい",
+      "noAccount": "アカウントをお持ちでない方",
+      "signUp": "無料で登録",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "rememberMe": "ログイン状態を保持",
+      "forgotPassword": "パスワードをお忘れの方",
+      "signIn": "ログイン",
+      "signingIn": "ログイン中..."
+    },
+    "signup": {
+      "title": "アカウントを作成",
+      "haveAccount": "すでにアカウントをお持ちの方",
+      "signIn": "ログイン",
+      "name": "氏名",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "confirmPassword": "パスワード（確認）",
+      "createAccount": "アカウントを作成",
+      "creatingAccount": "アカウント作成中..."
+    }
+  },
+  "ai": {
+    "assistant": {
+      "welcome": "こんにちは！AIアシスタントです。今日はどのようにお手伝いできますか？",
+      "placeholder": "メッセージを入力...",
+      "generating": "応答を生成中...",
+      "error": "申し訳ありません。リクエストを処理できませんでした。もう一度お試しください。"
+    },
+    "generation": {
+      "title": "AI コンテンツ生成",
+      "topic": "トピック",
+      "industry": "業界",
+      "keywords": "キーワード",
+      "generate": "コンテンツを生成",
+      "generating": "コンテンツを生成中...",
+      "humanize": "コンテンツを自然な表現に",
+      "error": "コンテンツの生成に失敗しました"
+    }
+  },
+  "content": {
+    "moderation": {
+      "alert": "コンテンツモデレーション警告",
+      "suspended": "コンテンツが一時停止されました",
+      "banned": "コンテンツが禁止されました",
+      "violations": "違反が検出されました",
+      "appeal": "異議申し立て",
+      "appealReason": "異議申し立ての理由",
+      "submitAppeal": "異議申し立てを提出",
+      "submittingAppeal": "異議申し立てを提出中..."
+    }
+  }
+}

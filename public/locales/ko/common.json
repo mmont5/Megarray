@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "features": "기능",
+    "pricing": "가격",
+    "login": "로그인",
+    "getStarted": "시작하기",
+    "dashboard": "대시보드"
+  },
+  "auth": {
+    "login": {
+      "title": "다시 오신 것을 환영합니다",
+      "noAccount": "계정이 없으신가요?",
+      "signUp": "무료로 가입하기",
+      "email": "이메일 주소",
+      "password": "비밀번호",
+      "rememberMe": "로그인 상태 유지",
+      "forgotPassword": "비밀번호를 잊으셨나요?",
+      "signIn": "로그인",
+      "signingIn": "로그인 중..."
+    },
+    "signup": {
+      "title": "계정 만들기",
+      "haveAccount": "이미 계정이 있으신가요?",
+      "signIn": "로그인",
+      "name": "이름",
+      "email": "이메일 주소",
+      "password": "비밀번호",
+      "confirmPassword": "비밀번호 확인",
+      "createAccount": "계정 만들기",
+      "creatingAccount": "계정 생성 중..."
+    }
+  },
+  "ai": {
+    "assistant": {
+      "welcome": "안녕하세요! AI 어시스턴트입니다. 오늘은 어떤 도움이 필요하신가요?",
+      "placeholder": "메시지를 입력하세요...",
+      "generating": "응답 생성 중...",
+      "error": "죄송합니다. 요청을 처리할 수 없었습니다. 다시 시도해 주세요."
+    },
+    "generation": {
+      "title": "AI 콘텐츠 생성",
+      "topic": "주제",
+      "industry": "산업",
+      "keywords": "키워드",
+      "generate": "콘텐츠 생성",
+      "generating": "콘텐츠 생성 중...",
+      "humanize": "콘텐츠 자연스럽게 만들기",
+      "error": "콘텐츠 생성 실패"
+    }
+  },
+  "content": {
+    "moderation": {
+      "alert": "콘텐츠 검토 알림",
+      "suspended": "콘텐츠가 일시 중단되었습니다",
+      "banned": "콘텐츠가 차단되었습니다",
+      "violations": "위반 사항이 발견되었습니다",
+      "appeal": "이의 제기",
+      "appealReason": "이의 제기 사유",
+      "submitAppeal": "이의 제기 제출",
+      "submittingAppeal": "이의 제기 제출 중..."
+    }
+  }
+}

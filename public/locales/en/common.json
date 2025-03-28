@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "login": "Login",
+    "getStarted": "Get Started",
+    "dashboard": "Dashboard"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up for free",
+      "email": "Email address",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "signIn": "Sign in",
+      "signingIn": "Signing in..."
+    },
+    "signup": {
+      "title": "Create your account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "name": "Full Name",
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "createAccount": "Create account",
+      "creatingAccount": "Creating account..."
+    }
+  },
+  "ai": {
+    "assistant": {
+      "welcome": "Hi! I'm your AI assistant. How can I help you today?",
+      "placeholder": "Type your message...",
+      "generating": "Generating response...",
+      "error": "Sorry, I couldn't process that request. Please try again."
+    },
+    "generation": {
+      "title": "AI Content Generation",
+      "topic": "Topic",
+      "industry": "Industry",
+      "keywords": "Keywords",
+      "generate": "Generate Content",
+      "generating": "Generating content...",
+      "humanize": "Humanize content",
+      "error": "Failed to generate content"
+    }
+  },
+  "content": {
+    "moderation": {
+      "alert": "Content Moderation Alert",
+      "suspended": "Your content has been suspended",
+      "banned": "Your content has been banned",
+      "violations": "Violations detected",
+      "appeal": "Submit Appeal",
+      "appealReason": "Appeal Reason",
+      "submitAppeal": "Submit Appeal",
+      "submittingAppeal": "Submitting appeal..."
+    }
+  }
+}

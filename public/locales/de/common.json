@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "features": "Funktionen",
+    "pricing": "Preise",
+    "login": "Anmelden",
+    "getStarted": "Loslegen",
+    "dashboard": "Dashboard"
+  },
+  "auth": {
+    "login": {
+      "title": "Willkommen zurück",
+      "noAccount": "Noch kein Konto?",
+      "signUp": "Kostenlos registrieren",
+      "email": "E-Mail-Adresse",
+      "password": "Passwort",
+      "rememberMe": "Angemeldet bleiben",
+      "forgotPassword": "Passwort vergessen?",
+      "signIn": "Anmelden",
+      "signingIn": "Anmeldung läuft..."
+    },
+    "signup": {
+      "title": "Konto erstellen",
+      "haveAccount": "Bereits ein Konto?",
+      "signIn": "Anmelden",
+      "name": "Vollständiger Name",
+      "email": "E-Mail-Adresse",
+      "password": "Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "createAccount": "Konto erstellen",
+      "creatingAccount": "Konto wird erstellt..."
+    }
+  },
+  "ai": {
+    "assistant": {
+      "welcome": "Hallo! Ich bin Ihr KI-Assistent. Wie kann ich Ihnen heute helfen?",
+      "placeholder": "Nachricht eingeben...",
+      "generating": "Antwort wird generiert...",
+      "error": "Entschuldigung, ich konnte diese Anfrage nicht verarbeiten. Bitte versuchen Sie es erneut."
+    },
+    "generation": {
+      "title": "KI-Inhaltsgenerierung",
+      "topic": "Thema",
+      "industry": "Branche",
+      "keywords": "Schlüsselwörter",
+      "generate": "Inhalt generieren",
+      "generating": "Inhalt wird generiert...",
+      "humanize": "Inhalt humanisieren",
+      "error": "Fehler bei der Generierung des Inhalts"
+    }
+  },
+  "content": {
+    "moderation": {
+      "alert": "Inhaltsmoderationswarnung",
+      "suspended": "Ihr Inhalt wurde ausgesetzt",
+      "banned": "Ihr Inhalt wurde gesperrt",
+      "violations": "Verstöße erkannt",
+      "appeal": "Einspruch einlegen",
+      "appealReason": "Grund für Einspruch",
+      "submitAppeal": "Einspruch einreichen",
+      "submittingAppeal": "Einspruch wird eingereicht..."
+    }
+  }
+}

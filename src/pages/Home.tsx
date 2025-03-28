@@ -1,281 +1,201 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  ArrowRight, CheckCircle, BarChart2, MessageSquare, Calendar, Zap, Database, Shield,
-  CreditCard, Wallet, Brain, Globe, Lock, Sparkles, Users, Bot
+import { Link as RouterLink } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Grid,
+  Typography,
+  Card,
+  CardContent,
+  Stack,
+  Link,
+  useTheme,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import {
+  Wand2, Brain, Calendar, BarChart2, Target, Users,
+  Bot, Sparkles, Zap, Globe, Lock, Shield
 } from 'lucide-react';
 
+// Styled components
+const HeroSection = styled('section')(({ theme }) => ({
+  position: 'relative',
+  backgroundColor: theme.palette.secondary.main,
+  padding: theme.spacing(12, 2),
+  color: theme.palette.common.white,
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: 'url(https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80)',
+    backgroundSize: 'cover',
+    opacity: 0.05,
+  },
+}));
+
+const GradientText = styled(Typography)(({ theme }) => ({
+  background: `linear-gradient(to right, #3B82F6, #2563EB)`,
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+}));
+
+const FeatureCard = styled(Card)(({ theme }) => ({
+  height: '100%',
+  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+    boxShadow: theme.shadows[4],
+  },
+}));
+
+const IconWrapper = styled(Box)(({ theme }) => ({
+  width: 48,
+  height: 48,
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: '#EFF6FF',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: theme.spacing(2),
+  color: '#3B82F6',
+}));
+
 const Home = () => {
+  const theme = useTheme();
+
+  const features = [
+    {
+      title: 'AI Content Generation',
+      description: 'Create engaging content in seconds with advanced AI that understands your brand voice.',
+      icon: Brain,
+    },
+    {
+      title: 'Smart Scheduling',
+      description: 'Schedule content at optimal times across all platforms for maximum engagement.',
+      icon: Calendar,
+    },
+    {
+      title: 'Advanced Analytics',
+      description: 'Track performance and get AI-powered insights to optimize your strategy.',
+      icon: BarChart2,
+    },
+    {
+      title: 'A/B Testing',
+      description: 'Test different variations of your content to maximize performance.',
+      icon: Target,
+    },
+    {
+      title: 'Team Collaboration',
+      description: 'Work seamlessly with your team with advanced collaboration features.',
+      icon: Users,
+    },
+    {
+      title: 'Enterprise Security',
+      description: 'Bank-level security with advanced encryption and access controls.',
+      icon: Shield,
+    },
+  ];
+
   return (
-    <div className="w-full">
+    <Box>
       {/* Hero Section */}
-      <section className="relative bg-[#0A0F1C] px-4 sm:px-6 lg:px-8 pt-32 pb-24">
-        <div className="absolute inset-0 overflow-hidden">
-          <img 
-            src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80"
-            alt="Marketing Analytics"
-            className="w-full h-full object-cover opacity-5"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0A0F1C] via-[#0A0F1C] to-[#0A0F1C]/90"></div>
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="flex items-center justify-center space-x-2 mb-8">
-              <span className="px-3 py-1 text-sm font-medium text-[#00E5BE] bg-[#00E5BE]/10 rounded-full">
-                New: Crypto Payments Now Available
-              </span>
-            </div>
-            <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-              <span className="block font-extrabold mb-4">AI-Powered Marketing</span>
-              <span className="block bg-gradient-to-r from-[#00E5BE] to-[#00ABC7] bg-clip-text text-transparent font-extrabold">Made Simple</span>
-            </h1>
-            <p className="mt-8 text-xl md:text-2xl text-[#8A96A8] font-normal leading-relaxed max-w-3xl mx-auto">
-              Create, schedule, and analyze your marketing content with AI. Now with flexible payment options and usage-based pricing.
-            </p>
-            <div className="mt-12 flex justify-center gap-6">
-              <Link 
-                to="/signup" 
-                className="group px-8 py-4 text-lg font-semibold rounded-lg bg-[#00E5BE] text-white hover:bg-[#00D1AD] transition-all duration-300 transform hover:scale-105"
+      <HeroSection>
+        <Container maxWidth="lg">
+          <Stack spacing={4} alignItems="center" position="relative">
+            <Typography variant="h1" align="center" gutterBottom>
+              AI-Powered Marketing
+              <br />
+              <GradientText variant="h1" component="span">
+                Made Simple
+              </GradientText>
+            </Typography>
+            <Typography variant="h5" align="center" color="grey.400" maxWidth="md">
+              Create, schedule, and analyze your marketing content with AI.
+              Now with flexible payment options and usage-based pricing.
+            </Typography>
+            <Stack direction="row" spacing={2}>
+              <RouterLink
+                to="/signup"
+                className="px-6 py-3 bg-[#3B82F6] text-white rounded-lg hover:bg-[#2563EB] transition-colors duration-200 flex items-center"
               >
+                <Wand2 className="w-5 h-5 mr-2" />
                 Get Started
-                <ArrowRight className="inline-block ml-2 w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
-              <Link 
-                to="/features" 
-                className="group px-8 py-4 text-lg font-semibold rounded-lg border-2 border-[#2A3547] text-white hover:border-[#00E5BE] hover:text-[#00E5BE] transition-all duration-300"
+              </RouterLink>
+              <RouterLink
+                to="/features"
+                className="px-6 py-3 border-2 border-white text-white rounded-lg hover:bg-white hover:text-[#3B82F6] transition-colors duration-200"
               >
                 See Features
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+              </RouterLink>
+            </Stack>
+          </Stack>
+        </Container>
+      </HeroSection>
 
-      {/* Features Grid */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900">Everything you need to succeed</h2>
-            <p className="mt-4 text-xl text-gray-600">
-              Powerful features to supercharge your marketing efforts
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* Features Section */}
+      <Box sx={{ py: 12, backgroundColor: 'background.default' }}>
+        <Container maxWidth="lg">
+          <Typography variant="h2" align="center" gutterBottom>
+            Everything you need to succeed
+          </Typography>
+          <Typography variant="h5" align="center" color="text.secondary" paragraph>
+            Powerful features to supercharge your marketing efforts
+          </Typography>
+          <Grid container spacing={4} sx={{ mt: 4 }}>
             {features.map((feature, index) => (
-              <div key={index} className="p-6 rounded-xl bg-white border border-gray-100 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-                <div className="w-12 h-12 rounded-lg bg-[#00E5BE]/10 flex items-center justify-center text-[#00E5BE] mb-4">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </div>
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <FeatureCard>
+                  <CardContent>
+                    <IconWrapper>
+                      <feature.icon size={24} />
+                    </IconWrapper>
+                    <Typography variant="h6" gutterBottom>
+                      {feature.title}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      {feature.description}
+                    </Typography>
+                  </CardContent>
+                </FeatureCard>
+              </Grid>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Payment Options */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900">Flexible Payment Options</h2>
-            <p className="mt-4 text-xl text-gray-600">
-              Choose how you want to pay
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="p-8 rounded-xl bg-white border border-gray-100 shadow-xl">
-              <div className="flex items-center mb-6">
-                <CreditCard className="w-8 h-8 text-[#00E5BE] mr-4" />
-                <h3 className="text-xl font-semibold">Traditional Payments</h3>
-              </div>
-              <ul className="space-y-4">
-                <li className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-[#00E5BE] mr-2" />
-                  <span>All major credit cards accepted</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-[#00E5BE] mr-2" />
-                  <span>Apple Pay and Google Pay</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-[#00E5BE] mr-2" />
-                  <span>Secure payment processing</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="p-8 rounded-xl bg-white border border-gray-100 shadow-xl">
-              <div className="flex items-center mb-6">
-                <Wallet className="w-8 h-8 text-[#00E5BE] mr-4" />
-                <h3 className="text-xl font-semibold">Crypto Payments</h3>
-              </div>
-              <ul className="space-y-4">
-                <li className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-[#00E5BE] mr-2" />
-                  <span>ETH, USDC, BTC, MATIC accepted</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-[#00E5BE] mr-2" />
-                  <span>Connect any Web3 wallet</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-[#00E5BE] mr-2" />
-                  <span>Instant processing</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Usage-Based Pricing */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900">Simple, Usage-Based Pricing</h2>
-            <p className="mt-4 text-xl text-gray-600">
-              Only pay for what you use
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {pricingFeatures.map((feature, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 rounded-full bg-[#00E5BE]/10 flex items-center justify-center text-[#00E5BE] mx-auto mb-4">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 text-center">
-            <Link
-              to="/pricing"
-              className="inline-flex items-center px-6 py-3 text-lg font-semibold rounded-lg bg-[#00E5BE] text-white hover:bg-[#00D1AD]"
-            >
-              View Pricing
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Help & Support */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900">Help & Support</h2>
-            <p className="mt-4 text-xl text-gray-600">
-              We're here to help you succeed
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Link to="/docs" className="p-6 rounded-xl bg-white border border-gray-100 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-              <Bot className="w-8 h-8 text-[#00E5BE] mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Documentation</h3>
-              <p className="text-gray-600">Comprehensive guides and API documentation</p>
-            </Link>
-
-            <Link to="/support" className="p-6 rounded-xl bg-white border border-gray-100 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-              <MessageSquare className="w-8 h-8 text-[#00E5BE] mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Live Support</h3>
-              <p className="text-gray-600">Chat with our support team 24/7</p>
-            </Link>
-
-            <Link to="/community" className="p-6 rounded-xl bg-white border border-gray-100 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-              <Users className="w-8 h-8 text-[#00E5BE] mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Community</h3>
-              <p className="text-gray-600">Join our community of marketers</p>
-            </Link>
-          </div>
-        </div>
-      </section>
+          </Grid>
+        </Container>
+      </Box>
 
       {/* CTA Section */}
-      <section className="py-24 bg-[#0A0F1C]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-white">Ready to get started?</h2>
-            <p className="mt-4 text-xl text-gray-400">
+      <Box sx={{ py: 12, backgroundColor: theme.palette.secondary.main }}>
+        <Container maxWidth="lg">
+          <Stack spacing={4} alignItems="center">
+            <Typography variant="h2" align="center" color="common.white">
+              Ready to get started?
+            </Typography>
+            <Typography variant="h5" align="center" color="grey.400">
               Join thousands of marketers already using Megarray
-            </p>
-            <div className="mt-8 flex justify-center space-x-4">
-              <Link
+            </Typography>
+            <Stack direction="row" spacing={2}>
+              <RouterLink
                 to="/signup"
-                className="px-8 py-4 text-lg font-semibold rounded-lg bg-[#00E5BE] text-white hover:bg-[#00D1AD]"
+                className="px-6 py-3 bg-[#3B82F6] text-white rounded-lg hover:bg-[#2563EB] transition-colors duration-200"
               >
                 Start Free Trial
-              </Link>
-              <Link
-                to="/demo"
-                className="px-8 py-4 text-lg font-semibold rounded-lg border-2 border-gray-700 text-white hover:border-[#00E5BE]"
+              </RouterLink>
+              <RouterLink
+                to="/contact"
+                className="px-6 py-3 border-2 border-white text-white rounded-lg hover:bg-white hover:text-[#3B82F6] transition-colors duration-200"
               >
-                Request Demo
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+                Contact Sales
+              </RouterLink>
+            </Stack>
+          </Stack>
+        </Container>
+      </Box>
+    </Box>
   );
 };
-
-const features = [
-  {
-    icon: <Brain className="w-6 h-6" />,
-    title: 'AI Content Generation',
-    description: 'Create engaging content in seconds with advanced AI that understands your brand voice.',
-  },
-  {
-    icon: <Calendar className="w-6 h-6" />,
-    title: 'Smart Scheduling',
-    description: 'Schedule content at optimal times across all platforms for maximum engagement.',
-  },
-  {
-    icon: <BarChart2 className="w-6 h-6" />,
-    title: 'Advanced Analytics',
-    description: 'Track performance and get AI-powered insights to optimize your strategy.',
-  },
-  {
-    icon: <Bot className="w-6 h-6" />,
-    title: 'A/B Testing',
-    description: 'Test different variations of your content to maximize performance.',
-  },
-  {
-    icon: <Globe className="w-6 h-6" />,
-    title: 'Multi-Platform',
-    description: 'Manage all your social media accounts from one dashboard.',
-  },
-  {
-    icon: <Lock className="w-6 h-6" />,
-    title: 'Enterprise Security',
-    description: 'Bank-level security with advanced encryption and access controls.',
-  },
-];
-
-const pricingFeatures = [
-  {
-    icon: <Zap className="w-8 h-8" />,
-    title: 'Pay-as-you-go',
-    description: 'Only pay for the features and resources you actually use.',
-  },
-  {
-    icon: <Sparkles className="w-8 h-8" />,
-    title: 'Flexible Plans',
-    description: 'Choose from monthly plans or usage-based pricing.',
-  },
-  {
-    icon: <Shield className="w-8 h-8" />,
-    title: 'No Lock-in',
-    description: 'Change or cancel your plan at any time.',
-  },
-];
 
 export default Home;

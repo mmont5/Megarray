@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "features": "功能",
+    "pricing": "价格",
+    "login": "登录",
+    "getStarted": "开始使用",
+    "dashboard": "控制台"
+  },
+  "auth": {
+    "login": {
+      "title": "欢迎回来",
+      "noAccount": "还没有账号？",
+      "signUp": "免费注册",
+      "email": "电子邮箱",
+      "password": "密码",
+      "rememberMe": "记住我",
+      "forgotPassword": "忘记密码？",
+      "signIn": "登录",
+      "signingIn": "登录中..."
+    },
+    "signup": {
+      "title": "创建账号",
+      "haveAccount": "已有账号？",
+      "signIn": "登录",
+      "name": "全名",
+      "email": "电子邮箱",
+      "password": "密码",
+      "confirmPassword": "确认密码",
+      "createAccount": "创建账号",
+      "creatingAccount": "创建账号中..."
+    }
+  },
+  "ai": {
+    "assistant": {
+      "welcome": "你好！我是你的AI助手。今天需要什么帮助？",
+      "placeholder": "输入消息...",
+      "generating": "生成回复中...",
+      "error": "抱歉，无法处理此请求。请重试。"
+    },
+    "generation": {
+      "title": "AI内容生成",
+      "topic": "主题",
+      "industry": "行业",
+      "keywords": "关键词",
+      "generate": "生成内容",
+      "generating": "生成内容中...",
+      "humanize": "优化内容表达",
+      "error": "内容生成失败"
+    }
+  },
+  "content": {
+    "moderation": {
+      "alert": "内容审核提醒",
+      "suspended": "您的内容已被暂停",
+      "banned": "您的内容已被禁止",
+      "violations": "发现违规",
+      "appeal": "提出申诉",
+      "appealReason": "申诉理由",
+      "submitAppeal": "提交申诉",
+      "submittingAppeal": "提交申诉中..."
+    }
+  }
+}

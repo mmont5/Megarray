@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Globe } from 'lucide-react';
+import { Globe, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import SignupSteps from '../../components/SignupSteps';
+import { supabase } from '../../lib/supabase';
 
 const languages = [
   { code: 'en', name: 'English' },
-  { code: 'es', name: 'Spanish' },
-  { code: 'fr', name: 'French' },
-  { code: 'de', name: 'German' },
-  { code: 'it', name: 'Italian' },
+  { code: 'es', name: 'Español' },
+  { code: 'fr', name: 'Français' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'it', name: 'Italiano' },
+  { code: 'ja', name: '日本語' },
+  { code: 'ko', name: '한국어' },
+  { code: 'zh', name: '中文' },
 ];
 
 const regions = [
@@ -23,23 +28,50 @@ const steps = ['Role', 'Plan', 'Setup', 'Complete'];
 
 const Setup = () => {
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
   const [formData, setFormData] = useState({
-    language: 'en',
+    language: i18n.language || 'en',
     region: 'na',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    if (name === 'language') {
+      i18n.changeLanguage(value);
+      localStorage.setItem('megarray.language', value);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('userPreferences', JSON.stringify(formData));
-    navigate('/signup/complete');
+    setIsLoading(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user found');
+
+      // Update user preferences
+      const { error: prefsError } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user.id,
+          language: formData.language,
+          region: formData.region,
+          timezone: formData.timezone,
+        });
+
+      if (prefsError) throw prefsError;
+
+      navigate('/signup/complete');
+    } catch (error) {
+      console.error('Setup error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -65,7 +97,7 @@ const Setup = () => {
               value={formData.language}
               onChange={handleChange}
               className="mt-2 block w-full rounded-lg border-gray-300 shadow-sm 
-                focus:border-[#00E5BE] focus:ring-[#00E5BE]"
+                focus:border-blue-500 focus:ring-blue-500"
             >
               {languages.map((lang) => (
                 <option key={lang.code} value={lang.code}>
@@ -85,7 +117,7 @@ const Setup = () => {
               value={formData.region}
               onChange={handleChange}
               className="mt-2 block w-full rounded-lg border-gray-300 shadow-sm 
-                focus:border-[#00E5BE] focus:ring-[#00E5BE]"
+                focus:border-blue-500 focus:ring-blue-500"
             >
               {regions.map((region) => (
                 <option key={region.code} value={region.code}>
@@ -107,10 +139,19 @@ const Setup = () => {
 
           <button
             type="submit"
-            className="w-full py-3 px-4 rounded-lg font-semibold bg-[#00E5BE] 
-              text-white hover:bg-[#00D1AD] transition-colors duration-300"
+            disabled={isLoading}
+            className="w-full py-3 px-4 rounded-lg font-semibold bg-blue-500 
+              text-white hover:bg-blue-600 transition-colors duration-300
+              disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Continue
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 mr-2 animate-spin" />
+                Saving preferences...
+              </span>
+            ) : (
+              'Continue'
+            )}
           </button>
         </form>
       </div>
