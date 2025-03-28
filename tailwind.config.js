@@ -8,6 +8,19 @@ export default {
     extend: {
       colors: {
         primary: {
+          DEFAULT: '#00E5BE',
+          50: '#E6FFF9',
+          100: '#B3FFF0',
+          200: '#80FFE7',
+          300: '#4DFFDE',
+          400: '#1AFFD5',
+          500: '#00E5BE',
+          600: '#00B294',
+          700: '#007F6B',
+          800: '#004C40',
+          900: '#001A16',
+        },
+        secondary: {
           DEFAULT: '#4F46E5',
           50: '#EBEAFC',
           100: '#D6D4FA',
@@ -20,17 +33,10 @@ export default {
           800: '#1F1C5C',
           900: '#0F0E2E',
         },
-        gray: {
-          50: '#F9FAFB',
-          100: '#F3F4F6',
-          200: '#E5E7EB',
-          300: '#D1D5DB',
-          400: '#9CA3AF',
-          500: '#6B7280',
-          600: '#4B5563',
-          700: '#374151',
-          800: '#1F2937',
-          900: '#111827',
+        surface: {
+          DEFAULT: '#1E293B',
+          light: '#334155',
+          dark: '#0F172A',
         },
       },
       fontFamily: {
@@ -47,34 +53,10 @@ export default {
         '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
         '5xl': ['3rem', { lineHeight: '1.16' }],
       },
-      spacing: {
-        '18': '4.5rem',
-        '112': '28rem',
-        '128': '32rem',
-      },
-      borderRadius: {
-        'xl': '1rem',
-        '2xl': '1.5rem',
-        '3xl': '2rem',
-      },
       boxShadow: {
         'soft': '0 2px 4px 0 rgba(0,0,0,0.05)',
         'medium': '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
         'hard': '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
-      },
-      animation: {
-        'fade-in': 'fadeIn 0.3s ease-in-out',
-        'slide-up': 'slideUp 0.3s ease-in-out',
-      },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        slideUp: {
-          '0%': { transform: 'translateY(20px)' },
-          '100%': { transform: 'translateY(0)' },
-        },
       },
     },
   },

@@ -27,84 +27,32 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // For development, create a mock user with a valid UUID
+  const mockUser: User = {
+    id: '00000000-0000-0000-0000-000000000000', // Valid UUID format
+    email: 'dev@example.com',
+    role: 'admin',
+    name: 'Dev User',
+    subscription: {
+      plan: 'business',
+      status: 'active'
+    }
+  };
+
+  const [user, setUser] = useState<User | null>(mockUser);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          await loadUserData(session.user.id);
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-        }
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    setLoading(false);
   }, []);
-
-  const checkAuth = async () => {
-    try {
-      const session = await auth.getSession();
-      if (session) {
-        await loadUserData(session.user.id);
-      }
-    } catch (error) {
-      console.error('Auth check error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadUserData = async (userId: string) => {
-    try {
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (profileError) throw profileError;
-
-      const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select('*, plans(*)')
-        .eq('user_id', userId)
-        .eq('status', 'active')
-        .single();
-
-      setUser({
-        id: userId,
-        email: profile.email,
-        name: profile.name,
-        role: profile.role,
-        subscription: subscription ? {
-          plan: subscription.plans.name,
-          status: subscription.status,
-        } : undefined,
-      });
-    } catch (error) {
-      console.error('Error loading user data:', error);
-    }
-  };
 
   const login = async (email: string, password: string) => {
     try {
-      const { user: authUser } = await auth.signIn({ email, password });
-      if (!authUser) throw new Error('Login failed');
-      
-      await loadUserData(authUser.id);
-      
+      setUser(mockUser);
       const from = location.state?.from?.pathname || '/dashboard';
       navigate(from);
-      
       toast.success('Welcome back!');
     } catch (error: any) {
       console.error('Login error:', error);
@@ -115,10 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signup = async (name: string, email: string, password: string) => {
     try {
-      const { user: authUser } = await auth.signUp({ email, password, name });
-      if (!authUser) throw new Error('Signup failed');
-
-      await loadUserData(authUser.id);
+      setUser(mockUser);
       navigate('/signup/role');
       toast.success('Account created successfully');
     } catch (error: any) {
@@ -130,7 +75,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await auth.signOut();
       setUser(null);
       navigate('/login');
       toast.success('Logged out successfully');

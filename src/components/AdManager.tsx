@@ -2,42 +2,7 @@ import React, { useState } from 'react';
 import { Target, DollarSign, Users, Clock, Image as ImageIcon, Link as LinkIcon, BarChart2, Trash2, Edit2, Copy, CheckCircle, Brain } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface AdPlatform {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  formats: string[];
-}
-
-interface AdCampaign {
-  id: string;
-  name: string;
-  platform: string;
-  headline: string;
-  caption: string;
-  cta: string;
-  audience: {
-    location: string;
-    interests: string[];
-    demographics: {
-      ageRange: string;
-      gender: string;
-    };
-  };
-  budget: {
-    amount: number;
-    duration: number;
-  };
-  status: 'draft' | 'active' | 'paused' | 'completed';
-  performance?: {
-    impressions: number;
-    clicks: number;
-    ctr: number;
-    spend: number;
-  };
-}
-
-const platforms: AdPlatform[] = [
+const platforms = [
   {
     id: 'meta',
     name: 'Meta Ads',
@@ -57,10 +22,10 @@ const platforms: AdPlatform[] = [
     formats: ['in-feed', 'topview', 'branded-effects'],
   },
   {
-    id: 'twitter',
+    id: 'x',
     name: 'X Ads',
     icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>,
-    formats: ['promoted-tweets', 'thread', 'image', 'video'],
+    formats: ['promoted-posts', 'thread', 'image', 'video'],
   },
   {
     id: 'linkedin',
@@ -94,81 +59,53 @@ const platforms: AdPlatform[] = [
   },
 ];
 
+interface AdCampaign {
+  id: string;
+  name: string;
+  platform: string;
+  status: 'active' | 'paused' | 'completed';
+  performance?: {
+    impressions: number;
+    clicks: number;
+    ctr: number;
+    spend: number;
+  };
+}
+
 const AdManager = () => {
-  const [selectedPlatform, setSelectedPlatform] = useState<AdPlatform | null>(null);
-  const [campaigns, setCampaigns] = useState<AdCampaign[]>([]);
-  const [step, setStep] = useState<'platform' | 'details' | 'audience' | 'budget' | 'review'>('platform');
-  const [currentCampaign, setCurrentCampaign] = useState<Partial<AdCampaign>>({
-    name: '',
-    platform: '',
-    headline: '',
-    caption: '',
-    cta: 'Learn More',
-    audience: {
-      location: '',
-      interests: [],
-      demographics: {
-        ageRange: '18-65',
-        gender: 'all',
-      },
-    },
-    budget: {
-      amount: 100,
-      duration: 7,
-    },
-    status: 'draft',
-  });
-
-  const handlePlatformSelect = (platform: AdPlatform) => {
-    setSelectedPlatform(platform);
-    setCurrentCampaign({ ...currentCampaign, platform: platform.id });
-    setStep('details');
-  };
-
-  const handleCreateCampaign = () => {
-    const newCampaign: AdCampaign = {
-      ...currentCampaign as AdCampaign,
-      id: `campaign-${Date.now()}`,
+  const [campaigns, setCampaigns] = useState<AdCampaign[]>([
+    {
+      id: '1',
+      name: 'Summer Sale Campaign',
+      platform: 'facebook',
+      status: 'active',
       performance: {
-        impressions: 0,
-        clicks: 0,
-        ctr: 0,
-        spend: 0,
+        impressions: 12500,
+        clicks: 450,
+        ctr: 3.6,
+        spend: 250,
       },
-    };
-
-    setCampaigns([...campaigns, newCampaign]);
-    toast.success('Campaign created successfully!');
-    setStep('platform');
-    setSelectedPlatform(null);
-    setCurrentCampaign({
-      name: '',
-      platform: '',
-      headline: '',
-      caption: '',
-      cta: 'Learn More',
-      audience: {
-        location: '',
-        interests: [],
-        demographics: {
-          ageRange: '18-65',
-          gender: 'all',
-        },
+    },
+    {
+      id: '2',
+      name: 'Product Launch',
+      platform: 'instagram',
+      status: 'paused',
+      performance: {
+        impressions: 8200,
+        clicks: 320,
+        ctr: 3.9,
+        spend: 180,
       },
-      budget: {
-        amount: 100,
-        duration: 7,
-      },
-      status: 'draft',
-    });
-  };
+    },
+  ]);
 
   const handleDuplicateCampaign = (campaign: AdCampaign) => {
-    const duplicatedCampaign: AdCampaign = {
+    const newCampaign = {
       ...campaign,
-      id: `campaign-${Date.now()}`,
+      id: Date.now().toString(),
       name: `${campaign.name} (Copy)`,
-      status: 'draft',
+      status: 'paused' as const,
       performance: {
         impressions: 0,
         clicks: 0,
@@ -176,498 +113,149 @@ const AdManager = () => {
         spend: 0,
       },
     };
-
-    setCampaigns([...campaigns, duplicatedCampaign]);
-    toast.success('Campaign duplicated successfully!');
+    setCampaigns([...campaigns, newCampaign]);
+    toast.success('Campaign duplicated successfully');
   };
 
-  const handleDeleteCampaign = (campaignId: string) => {
-    setCampaigns(campaigns.filter(c => c.id !== campaignId));
-    toast.success('Campaign deleted successfully!');
+  const handleDeleteCampaign = (id: string) => {
+    setCampaigns(campaigns.filter(c => c.id !== id));
+    toast.success('Campaign deleted successfully');
   };
-
-  const renderPlatformSelection = () => (
-    <div className="space-y-6">
-      <h4 className="font-medium text-gray-900">Select Ad Platform</h4>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-        {platforms.map((platform) => (
-          <button
-            key={platform.id}
-            onClick={() => handlePlatformSelect(platform)}
-            className="p-4 rounded-lg border border-gray-200 hover:border-[#00E5BE] transition-colors duration-300"
-          >
-            <div className="flex flex-col items-center space-y-2">
-              {platform.icon}
-              <span className="text-sm font-medium">{platform.name}</span>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderCampaignDetails = () => (
-    <div className="space-y-6">
-      <h4 className="font-medium text-gray-900">Campaign Details</h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Campaign Name
-            </label>
-            <input
-              type="text"
-              value={currentCampaign.name}
-              onChange={(e) => setCurrentCampaign({ ...currentCampaign, name: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
-              placeholder="Enter campaign name"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Headline
-            </label>
-            <input
-              type="text"
-              value={currentCampaign.headline}
-              onChange={(e) => setCurrentCampaign({ ...currentCampaign, headline: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
-              placeholder="Enter headline"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Caption
-            </label>
-            <textarea
-              value={currentCampaign.caption}
-              onChange={(e) => setCurrentCampaign({ ...currentCampaign, caption: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
-              placeholder="Enter caption"
-              rows={3}
-            />
-          </div>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Call to Action
-            </label>
-            <select
-              value={currentCampaign.cta}
-              onChange={(e) => setCurrentCampaign({ ...currentCampaign, cta: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
-            >
-              <option value="Learn More">Learn More</option>
-              <option value="Shop Now">Shop Now</option>
-              <option value="Sign Up">Sign Up</option>
-              <option value="Download">Download</option>
-              <option value="Contact Us">Contact Us</option>
-            </select>
-          </div>
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h5 className="font-medium text-gray-900 mb-2">Ad Preview</h5>
-            <div className="space-y-2">
-              <div className="text-sm font-medium text-gray-900">
-                {currentCampaign.headline || 'Your Headline Here'}
-              </div>
-              <div className="text-sm text-gray-600">
-                {currentCampaign.caption || 'Your caption will appear here...'}
-              </div>
-              <button className="px-4 py-1 text-sm bg-[#00E5BE] text-white rounded-full">
-                {currentCampaign.cta}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-end">
-        <button
-          onClick={() => setStep('audience')}
-          disabled={!currentCampaign.name || !currentCampaign.headline || !currentCampaign.caption}
-          className="px-6 py-2 bg-[#00E5BE] text-white rounded-lg hover:bg-[#00D1AD] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Next: Audience
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderAudienceTargeting = () => (
-    <div className="space-y-6">
-      <h4 className="font-medium text-gray-900">Audience Targeting</h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Location
-            </label>
-            <input
-              type="text"
-              value={currentCampaign.audience?.location}
-              onChange={(e) => setCurrentCampaign({
-                ...currentCampaign,
-                audience: { ...currentCampaign.audience!, location: e.target.value }
-              })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
-              placeholder="Enter location"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Interests
-            </label>
-            <input
-              type="text"
-              value={currentCampaign.audience?.interests?.join(', ')}
-              onChange={(e) => setCurrentCampaign({
-                ...currentCampaign,
-                audience: { ...currentCampaign.audience!, interests: e.target.value.split(',').map(i => i.trim()) }
-              })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
-              placeholder="Enter interests (comma-separated)"
-            />
-          </div>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Age Range
-            </label>
-            <select
-              value={currentCampaign.audience?.demographics?.ageRange}
-              onChange={(e) => setCurrentCampaign({
-                ...currentCampaign,
-                audience: {
-                  ...currentCampaign.audience!,
-                  demographics: { ...currentCampaign.audience!.demographics, ageRange: e.target.value }
-                }
-              })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
-            >
-              <option value="18-24">18-24</option>
-              <option value="25-34">25-34</option>
-              <option value="35-44">35-44</option>
-              <option value="45-54">45-54</option>
-              <option value="55-64">55-64</option>
-              <option value="65+">65+</option>
-              <option value="18-65">All Ages (18-65+)</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Gender
-            </label>
-            <select
-              value={currentCampaign.audience?.demographics?.gender}
-              onChange={(e) => setCurrentCampaign({
-                ...currentCampaign,
-                audience: {
-                  ...currentCampaign.audience!,
-                  demographics: { ...currentCampaign.audience!.demographics, gender: e.target.value }
-                }
-              })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
-            >
-              <option value="all">All Genders</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-end space-x-4">
-        <button
-          onClick={() => setStep('details')}
-          className="px-6 py-2 text-gray-600 hover:text-gray-900 transition-colors duration-300"
-        >
-          Back
-        </button>
-        <button
-          onClick={() => setStep('budget')}
-          disabled={!currentCampaign.audience?.location}
-          className="px-6 py-2 bg-[#00E5BE] text-white rounded-lg hover:bg-[#00D1AD] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Next: Budget
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderBudgetSettings = () => (
-    <div className="space-y-6">
-      <h4 className="font-medium text-gray-900">Budget & Duration</h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Daily Budget
-          </label>
-          <div className="relative">
-            <span className="absolute left-4 top-2 text-gray-500">$</span>
-            <input
-              type="number"
-              value={currentCampaign.budget?.amount}
-              onChange={(e) => setCurrentCampaign({
-                ...currentCampaign,
-                budget: { ...currentCampaign.budget!, amount: Number(e.target.value) }
-              })}
-              className="w-full pl-8 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
-              min="1"
-              step="1"
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Duration (Days)
-          </label>
-          <input
-            type="number"
-            value={currentCampaign.budget?.duration}
-            onChange={(e) => setCurrentCampaign({
-              ...currentCampaign,
-              budget: { ...currentCampaign.budget!, duration: Number(e.target.value) }
-            })}
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
-            min="1"
-            step="1"
-          />
-        </div>
-      </div>
-      <div className="p-6 bg-gray-50 rounded-lg">
-        <h5 className="font-medium text-gray-900 mb-4">Campaign Summary</h5>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Daily Budget</span>
-            <span className="text-sm font-medium text-gray-900">
-              ${currentCampaign.budget?.amount}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Duration</span>
-            <span className="text-sm font-medium text-gray-900">
-              {currentCampaign.budget?.duration} days
-            </span>
-          </div>
-          <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-            <span className="text-sm font-medium text-gray-900">Total Budget</span>
-            <span className="text-sm font-medium text-gray-900">
-              ${(currentCampaign.budget?.amount || 0) * (currentCampaign.budget?.duration || 0)}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-end space-x-4">
-        <button
-          onClick={() => setStep('audience')}
-          className="px-6 py-2 text-gray-600 hover:text-gray-900 transition-colors duration-300"
-        >
-          Back
-        </button>
-        <button
-          onClick={() => setStep('review')}
-          disabled={!currentCampaign.budget?.amount || !currentCampaign.budget?.duration}
-          className="px-6 py-2 bg-[#00E5BE] text-white rounded-lg hover:bg-[#00D1AD] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Review Campaign
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderReview = () => (
-    <div className="space-y-6">
-      <h4 className="font-medium text-gray-900">Review Campaign</h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h5 className="font-medium text-gray-900 mb-3">Campaign Details</h5>
-            <div className="space-y-2">
-              <div>
-                <span className="text-sm text-gray-600">Name:</span>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  {currentCampaign.name}
-                </span>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Platform:</span>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  {platforms.find(p => p.id === currentCampaign.platform)?.name}
-                </span>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Headline:</span>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  {currentCampaign.headline}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h5 className="font-medium text-gray-900 mb-3">Audience</h5>
-            <div className="space-y-2">
-              <div>
-                <span className="text-sm text-gray-600">Location:</span>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  {currentCampaign.audience?.location}
-                </span>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Age Range:</span>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  {currentCampaign.audience?.demographics?.ageRange}
-                </span>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Interests:</span>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  {currentCampaign.audience?.interests?.join(', ')}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="space-y-6">
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h5 className="font-medium text-gray-900 mb-3">Budget</h5>
-            <div className="space-y-2">
-              <div>
-                <span className="text-sm text-gray-600">Daily Budget:</span>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  ${currentCampaign.budget?.amount}
-                </span>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Duration:</span>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  {currentCampaign.budget?.duration} days
-                </span>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Total Budget:</span>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  ${(currentCampaign.budget?.amount || 0) * (currentCampaign.budget?.duration || 0)}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <div className="flex items-start space-x-3">
-              <Brain className="w-5 h-5 text-blue-600 mt-1" />
-              <div>
-                <h5 className="font-medium text-blue-900">AI Recommendations</h5>
-                <ul className="mt-2 space-y-2 text-sm text-blue-700">
-                  <li>• Consider increasing budget by 20% to reach optimal audience size</li>
-                  <li>• Add more specific interests to improve targeting precision</li>
-                  <li>• Test multiple ad variations for better performance</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-end space-x-4">
-        <button
-          onClick={() => setStep('budget')}
-          className="px-6 py-2 text-gray-600 hover:text-gray-900 transition-colors duration-300"
-        >
-          Back
-        </button>
-        <button
-          onClick={handleCreateCampaign}
-          className="px-6 py-2 bg-[#00E5BE] text-white rounded-lg hover:bg-[#00D1AD] transition-colors duration-300"
-        >
-          Create Campaign
-        </button>
-      </div>
-    </div>
-  );
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
+    <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Target className="w-5 h-5 text-[#00E5BE]" />
-          <h3 className="text-xl font-semibold text-gray-900">Ad Manager</h3>
+          <h3 className="text-xl font-semibold text-white">Ad Manager</h3>
+        </div>
+        <button className="px-4 py-2 bg-[#00E5BE] text-white rounded-lg hover:bg-[#00D1AD]">
+          Create Campaign
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-gray-700 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Users className="w-5 h-5 text-[#00E5BE]" />
+              <span className="text-sm text-gray-300">Total Reach</span>
+            </div>
+          </div>
+          <p className="mt-2 text-2xl font-bold text-white">45.2K</p>
+          <p className="text-sm text-gray-400">+12% from last month</p>
+        </div>
+
+        <div className="bg-gray-700 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <BarChart2 className="w-5 h-5 text-[#00E5BE]" />
+              <span className="text-sm text-gray-300">CTR</span>
+            </div>
+          </div>
+          <p className="mt-2 text-2xl font-bold text-white">3.8%</p>
+          <p className="text-sm text-gray-400">+0.5% from last month</p>
+        </div>
+
+        <div className="bg-gray-700 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <DollarSign className="w-5 h-5 text-[#00E5BE]" />
+              <span className="text-sm text-gray-300">Total Spend</span>
+            </div>
+          </div>
+          <p className="mt-2 text-2xl font-bold text-white">$430</p>
+          <p className="text-sm text-gray-400">Under budget by 15%</p>
+        </div>
+
+        <div className="bg-gray-700 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Target className="w-5 h-5 text-[#00E5BE]" />
+              <span className="text-sm text-gray-300">Conversions</span>
+            </div>
+          </div>
+          <p className="mt-2 text-2xl font-bold text-white">128</p>
+          <p className="text-sm text-gray-400">+24% from last month</p>
         </div>
       </div>
 
-      {step === 'platform' && renderPlatformSelection()}
-      {step === 'details' && renderCampaignDetails()}
-      {step === 'audience' && renderAudienceTargeting()}
-      {step === 'budget' && renderBudgetSettings()}
-      {step === 'review' && renderReview()}
-
-      {campaigns.length > 0 && (
-        <div className="mt-8">
-          <h4 className="font-medium text-gray-900 mb-4">Active Campaigns</h4>
-          <div className="space-y-4">
-            {campaigns.map((campaign) => (
-              <div
-                key={campaign.id}
-                className="p-4 rounded-lg border border-gray-200 hover:border-[#00E5BE] transition-colors duration-300"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-2 h-2 rounded-full ${
-                      campaign.status === 'active' ? 'bg-green-500' :
-                      campaign.status === 'paused' ? 'bg-yellow-500' :
-                      campaign.status === 'completed' ? 'bg-blue-500' :
-                      'bg-gray-500'
-                    }`} />
-                    <span className="font-medium text-gray-900">{campaign.name}</span>
-                    <span className="text-sm text-gray-500">
-                      {platforms.find(p => p.id === campaign.platform)?.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handleDuplicateCampaign(campaign)}
-                      className="p-2 text-gray-500 hover:text-gray-700"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCampaign(campaign.id)}
-                      className="p-2 text-gray-500 hover:text-red-500"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+      <div className="space-y-4">
+        {campaigns.map((campaign) => (
+          <div
+            key={campaign.id}
+            className="p-4 bg-gray-700 rounded-lg border border-gray-600 hover:border-[#00E5BE] transition-colors duration-200"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className={`w-2 h-2 rounded-full ${
+                  campaign.status === 'active' ? 'bg-green-500' :
+                  campaign.status === 'paused' ? 'bg-yellow-500' :
+                  'bg-blue-500'
+                }`} />
+                <span className="font-medium text-white">{campaign.name}</span>
+                <span className="text-sm text-gray-400">{campaign.platform}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleDuplicateCampaign(campaign)}
+                  className="p-2 text-gray-400 hover:text-white"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDeleteCampaign(campaign.id)}
+                  className="p-2 text-gray-400 hover:text-red-500"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            {campaign.performance && (
+              <div className="mt-4 grid grid-cols-4 gap-4">
+                <div>
+                  <div className="text-sm text-gray-400">Impressions</div>
+                  <div className="font-medium text-white">
+                    {campaign.performance.impressions.toLocaleString()}
                   </div>
                 </div>
-                {campaign.performance && (
-                  <div className="mt-4 grid grid-cols-4 gap-4">
-                    <div>
-                      <div className="text-sm text-gray-500">Impressions</div>
-                      <div className="font-medium text-gray-900">
-                        {campaign.performance.impressions.toLocaleString()}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-500">Clicks</div>
-                      <div className="font-medium text-gray-900">
-                        {campaign.performance.clicks.toLocaleString()}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-500">CTR</div>
-                      <div className="font-medium text-gray-900">
-                        {campaign.performance.ctr.toFixed(2)}%
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-500">Spend</div>
-                      <div className="font-medium text-gray-900">
-                        ${campaign.performance.spend.toLocaleString()}
-                      </div>
-                    </div>
+                <div>
+                  <div className="text-sm text-gray-400">Clicks</div>
+                  <div className="font-medium text-white">
+                    {campaign.performance.clicks.toLocaleString()}
                   </div>
-                )}
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">CTR</div>
+                  <div className="font-medium text-white">
+                    {campaign.performance.ctr.toFixed(2)}%
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">Spend</div>
+                  <div className="font-medium text-white">
+                    ${campaign.performance.spend.toLocaleString()}
+                  </div>
+                </div>
               </div>
-            ))}
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="p-4 bg-gray-700 rounded-lg">
+        <div className="flex items-start space-x-3">
+          <Brain className="w-5 h-5 text-[#00E5BE] mt-1" />
+          <div>
+            <h5 className="font-medium text-white">AI Recommendations</h5>
+            <ul className="mt-2 space-y-2 text-sm text-gray-300">
+              <li>• Increase budget allocation for best performing campaigns</li>
+              <li>• Test new audience segments for better targeting</li>
+              <li>• Optimize ad creatives based on engagement data</li>
+            </ul>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

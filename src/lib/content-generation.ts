@@ -3,10 +3,10 @@ import { supabase } from './supabase';
 export interface GenerationOptions {
   type: string;
   topic: string;
-  industry: string;
   keywords: string[];
-  humanize?: boolean;
+  hashtags: string[];
   language?: string;
+  humanize?: boolean;
 }
 
 export interface GenerationResult {
@@ -14,8 +14,8 @@ export interface GenerationResult {
   metadata: {
     type: string;
     topic: string;
-    industry: string;
     keywords: string[];
+    hashtags: string[];
     language: string;
     humanized: boolean;
   };
@@ -46,8 +46,8 @@ export async function generateContent(options: GenerationOptions): Promise<Gener
       metadata: {
         type: options.type,
         topic: options.topic,
-        industry: options.industry,
         keywords: options.keywords,
+        hashtags: options.hashtags,
         language: options.language || 'en',
         humanized: options.humanize || false,
       },

@@ -22,6 +22,16 @@ import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import RoleManagement from './pages/admin/RoleManagement';
 import UserPermissions from './pages/admin/UserPermissions';
+import UserManagement from './pages/admin/UserManagement';
+import EditUser from './pages/admin/users/EditUser';
+import ResetUserPassword from './pages/admin/users/ResetPassword';
+import ManagePermissions from './pages/admin/users/ManagePermissions';
+import NewUser from './pages/admin/users/NewUser';
+import Overview from './pages/admin/analytics/Overview';
+import Performance from './pages/admin/analytics/Performance';
+import Logs from './pages/admin/analytics/Logs';
+import ContentManager from './pages/admin/content/ContentManager';
+import SecuritySettings from './pages/admin/security/SecuritySettings';
 
 const AppRoutes = () => {
   return (
@@ -67,27 +77,22 @@ const AppRoutes = () => {
             <Dashboard />
           </AuthGuard>
         } />
-        <Route path="/admin/*" element={
-          <AuthGuard allowedRoles={['admin', 'super_admin']}>
-            <AdminDashboard />
-          </AuthGuard>
-        } />
-        <Route path="/admin/roles" element={
-          <AuthGuard 
-            allowedRoles={['admin', 'super_admin']}
-            requiredPermissions={['manage_roles']}
-          >
-            <RoleManagement />
-          </AuthGuard>
-        } />
-        <Route path="/admin/permissions" element={
-          <AuthGuard 
-            allowedRoles={['admin', 'super_admin']}
-            requiredPermissions={['manage_permissions']}
-          >
-            <UserPermissions />
-          </AuthGuard>
-        } />
+        
+        {/* Admin Routes */}
+        <Route path="/admin/*" element={<AdminDashboard />}>
+          <Route path="users" element={<UserManagement />} />
+          <Route path="users/new" element={<NewUser />} />
+          <Route path="users/:userId/edit" element={<EditUser />} />
+          <Route path="users/:userId/reset-password" element={<ResetUserPassword />} />
+          <Route path="users/:userId/permissions" element={<ManagePermissions />} />
+          <Route path="roles" element={<RoleManagement />} />
+          <Route path="permissions" element={<UserPermissions />} />
+          <Route path="analytics" element={<Overview />} />
+          <Route path="analytics/performance" element={<Performance />} />
+          <Route path="analytics/logs" element={<Logs />} />
+          <Route path="content" element={<ContentManager />} />
+          <Route path="security" element={<SecuritySettings />} />
+        </Route>
       </Route>
     </Routes>
   );

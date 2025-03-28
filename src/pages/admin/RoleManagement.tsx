@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
+import { Shield, Plus, Edit2, Trash2, Save, X, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase';
 import { PERMISSIONS, PermissionName } from '../../lib/permissions';
@@ -9,6 +9,8 @@ interface Role {
   name: string;
   description: string;
   permissions: PermissionName[];
+  created_at: string;
+  updated_at: string;
 }
 
 const RoleManagement = () => {
@@ -47,6 +49,7 @@ const RoleManagement = () => {
           name: role.name,
           description: role.description,
           permissions: role.permissions,
+          updated_at: new Date().toISOString(),
         });
 
       if (error) throw error;
@@ -62,7 +65,9 @@ const RoleManagement = () => {
   };
 
   const handleDeleteRole = async (roleId: string) => {
-    if (!confirm('Are you sure you want to delete this role?')) return;
+    if (!confirm('Are you sure you want to delete this role? This action cannot be undone.')) {
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -80,10 +85,10 @@ const RoleManagement = () => {
     }
   };
 
-  const RoleForm = ({ role, onSave, onCancel }: { 
-    role: Partial<Role>, 
+  const RoleForm = ({ role, onSave, onCancel }: {
+    role: Partial<Role>,
     onSave: (role: Role) => void,
-    onCancel: () => void 
+    onCancel: () => void
   }) => {
     const [formData, setFormData] = useState({
       name: role.name || '',
@@ -91,47 +96,68 @@ const RoleManagement = () => {
       permissions: role.permissions || [],
     });
 
+    const permissionCategories = Object.entries(PERMISSIONS).reduce((acc, [key, permission]) => {
+      const category = permission.category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push({ key, ...permission });
+      return acc;
+    }, {} as Record<string, any[]>);
+
     return (
-      <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+      <div className="space-y-6 bg-gray-800 rounded-xl p-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Name</label>
+          <label className="block text-sm font-medium text-gray-300">Role Name</label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-[#00E5BE] focus:border-[#00E5BE]"
+            className="mt-1 block w-full rounded-lg bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-[#00E5BE] focus:border-[#00E5BE]"
+            placeholder="Enter role name"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Description</label>
+          <label className="block text-sm font-medium text-gray-300">Description</label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-[#00E5BE] focus:border-[#00E5BE]"
+            className="mt-1 block w-full rounded-lg bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-[#00E5BE] focus:border-[#00E5BE]"
+            rows={3}
+            placeholder="Enter role description"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {Object.entries(PERMISSIONS).map(([key, permission]) => (
-              <div key={key} className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.permissions.includes(key as PermissionName)}
-                  onChange={(e) => {
-                    const permissions = e.target.checked
-                      ? [...formData.permissions, key as PermissionName]
-                      : formData.permissions.filter(p => p !== key);
-                    setFormData({ ...formData, permissions });
-                  }}
-                  className="h-4 w-4 text-[#00E5BE] focus:ring-[#00E5BE] border-gray-300 rounded"
-                />
-                <label className="ml-2 block text-sm text-gray-900">
-                  {permission.name}
-                  <span className="ml-2 text-xs text-gray-500">{permission.description}</span>
-                </label>
+          <label className="block text-sm font-medium text-gray-300 mb-4">Permissions</label>
+          <div className="space-y-6">
+            {Object.entries(permissionCategories).map(([category, permissions]) => (
+              <div key={category} className="space-y-2">
+                <h4 className="font-medium text-white capitalize">{category}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {permissions.map((permission) => (
+                    <div key={permission.key} className="flex items-start">
+                      <input
+                        type="checkbox"
+                        checked={formData.permissions.includes(permission.key as PermissionName)}
+                        onChange={(e) => {
+                          const permissions = e.target.checked
+                            ? [...formData.permissions, permission.key as PermissionName]
+                            : formData.permissions.filter(p => p !== permission.key);
+                          setFormData({ ...formData, permissions });
+                        }}
+                        className="mt-1 h-4 w-4 text-[#00E5BE] focus:ring-[#00E5BE] bg-gray-700 border-gray-600 rounded"
+                      />
+                      <div className="ml-3">
+                        <label className="text-sm font-medium text-white">
+                          {permission.name}
+                        </label>
+                        <p className="text-xs text-gray-400">{permission.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -140,15 +166,16 @@ const RoleManagement = () => {
         <div className="flex justify-end space-x-2">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-gray-700 hover:text-gray-900"
+            className="px-4 py-2 text-gray-400 hover:text-white"
           >
             Cancel
           </button>
           <button
             onClick={() => onSave({ id: role.id!, ...formData } as Role)}
-            className="px-4 py-2 bg-[#00E5BE] text-white rounded-lg hover:bg-[#00D1AD]"
+            disabled={!formData.name}
+            className="px-4 py-2 bg-[#00E5BE] text-white rounded-lg hover:bg-[#00D1AD] disabled:opacity-50"
           >
-            Save Role
+            {role.id ? 'Update Role' : 'Create Role'}
           </button>
         </div>
       </div>
@@ -168,7 +195,7 @@ const RoleManagement = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Shield className="w-5 h-5 text-[#00E5BE]" />
-          <h2 className="text-2xl font-bold text-gray-900">Role Management</h2>
+          <h2 className="text-2xl font-bold text-white">Role Management</h2>
         </div>
         <button
           onClick={() => setIsCreating(true)}
@@ -191,7 +218,7 @@ const RoleManagement = () => {
         {roles.map((role) => (
           <div
             key={role.id}
-            className="p-6 bg-white rounded-xl border border-gray-200 hover:border-[#00E5BE] transition-all duration-300"
+            className="bg-gray-800 rounded-xl p-6 hover:bg-gray-700 transition-all duration-300"
           >
             {editingRole?.id === role.id ? (
               <RoleForm
@@ -203,13 +230,13 @@ const RoleManagement = () => {
               <>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900">{role.name}</h3>
-                    <p className="text-sm text-gray-500">{role.description}</p>
+                    <h3 className="text-lg font-medium text-white">{role.name}</h3>
+                    <p className="text-sm text-gray-400">{role.description}</p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setEditingRole(role)}
-                      className="p-2 text-gray-400 hover:text-gray-600"
+                      className="p-2 text-gray-400 hover:text-white"
                     >
                       <Edit2 className="w-5 h-5" />
                     </button>
@@ -223,17 +250,22 @@ const RoleManagement = () => {
                 </div>
 
                 <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Permissions</h4>
+                  <h4 className="text-sm font-medium text-gray-300 mb-2">Permissions</h4>
                   <div className="flex flex-wrap gap-2">
                     {role.permissions.map((permission) => (
                       <span
                         key={permission}
-                        className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#00E5BE] bg-opacity-10 text-[#00E5BE]"
                       >
+                        <CheckCircle className="w-3 h-3 mr-1" />
                         {PERMISSIONS[permission].name}
                       </span>
                     ))}
                   </div>
+                </div>
+
+                <div className="mt-4 text-sm text-gray-400">
+                  Last updated: {new Date(role.updated_at).toLocaleDateString()}
                 </div>
               </>
             )}

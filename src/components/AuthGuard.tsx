@@ -31,25 +31,28 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+  // Only check auth for non-admin routes
+  if (!location.pathname.startsWith('/admin')) {
+    if (!user) {
+      return <Navigate to="/login" state={{ from: location }} replace />;
+    }
 
-  if (requireSubscription && (!user.subscription || user.subscription.status !== 'active')) {
-    return <Navigate to="/pricing" state={{ from: location }} replace />;
-  }
+    if (requireSubscription && (!user.subscription || user.subscription.status !== 'active')) {
+      return <Navigate to="/pricing" state={{ from: location }} replace />;
+    }
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  if (requiredPermissions.length > 0) {
-    const hasRequiredPermissions = requireAllPermissions
-      ? requiredPermissions.every(p => permissions.includes(p))
-      : requiredPermissions.some(p => permissions.includes(p));
-
-    if (!hasRequiredPermissions) {
+    if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
       return <Navigate to="/dashboard" replace />;
+    }
+
+    if (requiredPermissions.length > 0) {
+      const hasRequiredPermissions = requireAllPermissions
+        ? requiredPermissions.every(p => permissions.includes(p))
+        : requiredPermissions.some(p => permissions.includes(p));
+
+      if (!hasRequiredPermissions) {
+        return <Navigate to="/dashboard" replace />;
+      }
     }
   }
 

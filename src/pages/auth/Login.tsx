@@ -47,15 +47,12 @@ const Login = () => {
 
     try {
       await login(formData.email, formData.password);
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from);
+      toast.success('Welcome back!');
     } catch (error: any) {
       console.error('Login error:', error);
-      if (error.message.includes('Invalid login credentials')) {
-        setError('Incorrect email or password. Please try again.');
-      } else if (error.message.includes('rate limit')) {
-        setError('Too many login attempts. Please try again later.');
-      } else {
-        setError('Login failed. Please check your credentials and try again.');
-      }
+      setError(error.message || 'Failed to log in. Please check your credentials and try again.');
     } finally {
       setIsLoading(false);
     }

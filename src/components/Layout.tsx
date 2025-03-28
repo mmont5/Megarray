@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -11,6 +11,10 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ requireAuth = false }) => {
   const { loading } = useAuth();
+  const location = useLocation();
+
+  // Check if we're in a dashboard route
+  const isDashboardRoute = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin');
 
   if (loading && requireAuth) {
     return (
@@ -22,11 +26,16 @@ const Layout: React.FC<LayoutProps> = ({ requireAuth = false }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      {/* Only show Navbar on non-dashboard routes */}
+      {!isDashboardRoute && <Navbar />}
+      
       <main className="flex-grow">
         <Outlet />
       </main>
-      <Footer />
+
+      {/* Only show Footer on non-dashboard routes */}
+      {!isDashboardRoute && <Footer />}
+      
       <AIAssistant onAction={(action, params) => {
         console.log('AI Assistant Action:', action, params);
       }} />

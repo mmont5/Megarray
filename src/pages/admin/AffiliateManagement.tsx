@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, DollarSign, BarChart2, Settings, Search, Download, Filter } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '../../lib/supabase';
 
 interface AffiliateUser {
   id: string;
@@ -35,44 +37,102 @@ const AffiliateManagement = () => {
 
   const fetchAffiliates = async () => {
     try {
-      const response = await fetch('/api/admin/affiliates');
-      const data = await response.json();
-      setAffiliates(data);
+      const { data: affiliateLinks, error: linksError } = await supabase
+        .from('affiliate_links')
+        .select(`
+          *,
+          user:profiles(
+            id,
+            first_name,
+            last_name,
+            email
+          ),
+          clicks:affiliate_clicks(count),
+          conversions:affiliate_conversions(amount, commission_amount)
+        `);
+
+      if (linksError) throw linksError;
+
+      // Process data
+      const affiliateData = affiliateLinks.map((link: any) => {
+        const totalEarnings = link.conversions.reduce((sum: number, conv: any) => sum + conv.commission_amount, 0);
+        const clicks = link.clicks.length;
+        const conversions = link.conversions.length;
+        const conversionRate = clicks > 0 ? (conversions / clicks) * 100 : 0;
+
+        return {
+          id: link.user.id,
+          name: `${link.user.first_name} ${link.user.last_name || ''}`.trim(),
+          email: link.user.email,
+          totalEarnings,
+          pendingPayout: 0, // Will be calculated from pending conversions
+          conversionRate,
+          status: 'active',
+          joinedAt: link.created_at,
+        };
+      });
+
+      setAffiliates(affiliateData);
     } catch (error) {
       console.error('Error fetching affiliates:', error);
+      toast.error('Failed to load affiliate data');
     }
   };
 
   const fetchPayoutRequests = async () => {
     try {
-      const response = await fetch('/api/admin/affiliate-payouts');
-      const data = await response.json();
-      setPayoutRequests(data);
+      const { data: payouts, error: payoutsError } = await supabase
+        .from('affiliate_payouts')
+        .select(`
+          *,
+          user:profiles(
+            first_name,
+            last_name
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (payoutsError) throw payoutsError;
+
+      const formattedPayouts = payouts.map((payout: any) => ({
+        id: payout.id,
+        userId: payout.user_id,
+        userName: `${payout.user.first_name} ${payout.user.last_name || ''}`.trim(),
+        amount: payout.amount,
+        method: payout.payout_method,
+        status: payout.status,
+        requestedAt: payout.created_at,
+      }));
+
+      setPayoutRequests(formattedPayouts);
     } catch (error) {
       console.error('Error fetching payout requests:', error);
+      toast.error('Failed to load payout requests');
     }
   };
 
   const handlePayoutAction = async (payoutId: string, action: 'approve' | 'reject') => {
     try {
-      const response = await fetch(`/api/admin/affiliate-payouts/${payoutId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action }),
-      });
+      const { error } = await supabase
+        .from('affiliate_payouts')
+        .update({
+          status: action === 'approve' ? 'completed' : 'rejected',
+          processed_at: new Date().toISOString(),
+        })
+        .eq('id', payoutId);
 
-      if (!response.ok) throw new Error('Failed to update payout status');
+      if (error) throw error;
 
-      // Update local state
       setPayoutRequests(payoutRequests.map(request =>
         request.id === payoutId
           ? { ...request, status: action === 'approve' ? 'approved' : 'rejected' }
           : request
       ));
+
+      toast.success(`Payout ${action}d successfully`);
     } catch (error) {
       console.error('Error updating payout status:', error);
+      toast.error('Failed to update payout status');
     }
   };
 
