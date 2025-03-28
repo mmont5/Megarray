@@ -13,11 +13,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: false,
-    storageKey: 'megarray.auth.token',
+    persistSession: true,
+    detectSessionInUrl: true,
     storage: localStorage,
+    storageKey: 'megarray.auth.token',
+    flowType: 'pkce',
   },
 });
 

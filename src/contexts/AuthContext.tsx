@@ -1,97 +1,79 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
-import { supabase } from '../lib/supabase';
-import * as auth from '../lib/auth';
+import { initiateGithubAuth, handleGithubCallback } from '../lib/github-auth';
 
 interface User {
   id: string;
-  email: string;
-  role: string;
   name: string;
-  subscription?: {
-    plan: string;
-    status: string;
-  };
+  email: string;
+  username: string;
+  avatar_url: string;
+  access_token: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  updateUser: (data: Partial<User>) => void;
+  login: () => Promise<void>;
+  logout: () => void;
+  handleAuthCallback: (code: string, state: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // For development, create a mock user with a valid UUID
-  const mockUser: User = {
-    id: '00000000-0000-0000-0000-000000000000', // Valid UUID format
-    email: 'dev@example.com',
-    role: 'admin',
-    name: 'Dev User',
-    subscription: {
-      plan: 'business',
-      status: 'active'
-    }
-  };
-
-  const [user, setUser] = useState<User | null>(mockUser);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
+    // Check for stored auth data
+    const storedAuth = localStorage.getItem('github_auth');
+    if (storedAuth) {
+      setUser(JSON.parse(storedAuth));
+    }
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async () => {
     try {
-      setUser(mockUser);
+      await initiateGithubAuth();
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Failed to initiate login');
+    }
+  };
+
+  const handleAuthCallback = async (code: string, state: string) => {
+    try {
+      const userData = await handleGithubCallback(code, state);
+      
+      setUser(userData);
+      localStorage.setItem('github_auth', JSON.stringify(userData));
+
+      // Redirect to intended destination or dashboard
       const from = location.state?.from?.pathname || '/dashboard';
       navigate(from);
-      toast.success('Welcome back!');
-    } catch (error: any) {
-      console.error('Login error:', error);
-      toast.error(error.message || 'Failed to log in');
-      throw error;
-    }
-  };
-
-  const signup = async (name: string, email: string, password: string) => {
-    try {
-      setUser(mockUser);
-      navigate('/signup/role');
-      toast.success('Account created successfully');
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      toast.error(error.message || 'Failed to create account');
-      throw error;
-    }
-  };
-
-  const logout = async () => {
-    try {
-      setUser(null);
+      
+      toast.success('Successfully logged in!');
+    } catch (error) {
+      console.error('Auth callback error:', error);
+      toast.error('Authentication failed');
       navigate('/login');
-      toast.success('Logged out successfully');
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      toast.error(error.message || 'Failed to log out');
     }
   };
 
-  const updateUser = (data: Partial<User>) => {
-    if (user) {
-      setUser({ ...user, ...data });
-    }
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('github_auth');
+    navigate('/login');
+    toast.success('Logged out successfully');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, handleAuthCallback }}>
       {children}
     </AuthContext.Provider>
   );

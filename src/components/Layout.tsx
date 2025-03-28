@@ -1,28 +1,15 @@
 import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import AIAssistant from './AIAssistant';
+import { useLocation } from 'react-router-dom';
 
-interface LayoutProps {
-  requireAuth?: boolean;
-}
-
-const Layout: React.FC<LayoutProps> = ({ requireAuth = false }) => {
-  const { loading } = useAuth();
+const Layout = () => {
   const location = useLocation();
 
   // Check if we're in a dashboard route
   const isDashboardRoute = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin');
-
-  if (loading && requireAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00E5BE]"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col min-h-screen">

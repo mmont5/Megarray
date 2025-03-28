@@ -17,17 +17,51 @@ serve(async (req) => {
   }
 
   try {
-    const { type, topic, industry, keywords, humanize, language } = await req.json();
-
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    // Get user's subscription tier for rate limiting
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Unauthorized');
+    // Get user and verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'No authorization header' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Please log in to generate content' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Parse request body
+    const { topic, type = 'post', platform = 'general', tone = 'professional' } = await req.json();
+    
+    if (!topic?.trim()) {
+      return new Response(
+        JSON.stringify({ error: 'Topic is required' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Check user's subscription and usage limits
     const { data: subscription } = await supabase
       .from('subscriptions')
       .select('plans(name)')
@@ -35,117 +69,134 @@ serve(async (req) => {
       .eq('status', 'active')
       .single();
 
-    // Check rate limits
-    const { data: usageData } = await supabase
-      .from('usage')
-      .select('amount')
-      .eq('user_id', user.id)
-      .eq('type', 'ai_generation')
-      .gte('timestamp', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+    const { data: usage } = await supabase
+      .from('subscription_usage')
+      .select('used_amount, max_allowed')
+      .eq('subscription_id', subscription?.id)
+      .eq('feature', 'ai_credits')
       .single();
 
-    const dailyLimit = subscription?.plans?.name === 'Enterprise' ? -1 :
-                      subscription?.plans?.name === 'Business' ? 1000 :
-                      subscription?.plans?.name === 'Pro' ? 500 : 100;
-
-    if (dailyLimit !== -1 && (usageData?.amount || 0) >= dailyLimit) {
-      throw new Error('Daily generation limit exceeded');
+    if (usage && usage.max_allowed !== -1 && usage.used_amount >= usage.max_allowed) {
+      return new Response(
+        JSON.stringify({ error: 'AI generation limit reached' }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
-    // Generate content with OpenAI
-    const prompt = `Create a ${type} about ${topic} in the ${industry} industry.
-Include these keywords: ${keywords.join(', ')}.
-Make it engaging and natural-sounding.
-Language: ${language}`;
+    // Build the prompt based on content type and platform
+    const systemPrompt = `You are an expert marketing content creator specializing in ${platform} content.
+Your task is to create engaging, platform-optimized content that follows best practices and drives engagement.
 
+Content Guidelines:
+- Type: ${type}
+- Platform: ${platform}
+- Tone: ${tone}
+- Length: Appropriate for ${platform} (e.g., short for Twitter, longer for blog posts)
+- Style: Natural, engaging, and authentic
+- Include: Relevant hashtags, emojis (if appropriate), and calls-to-action
+
+Focus on:
+- Clear value proposition
+- Engaging opening
+- Natural language
+- Platform-specific formatting
+- SEO optimization (where applicable)
+- Call-to-action`;
+
+    const userPrompt = `Create ${type} content about "${topic}" for ${platform}.
+Make it engaging and natural-sounding, optimized for the platform.
+Use a ${tone} tone.`;
+
+    // Generate content with OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
           role: "system",
-          content: "You are an expert marketing content creator with deep knowledge of digital marketing and content strategy."
+          content: systemPrompt
         },
         {
           role: "user",
-          content: prompt
+          content: userPrompt
         }
       ],
       temperature: 0.7,
       max_tokens: 1000
     });
 
-    let content = completion.choices[0].message.content || '';
+    const content = completion.choices[0].message.content;
 
-    // Humanize if requested
-    if (humanize) {
-      const humanizedCompletion = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: "You are an expert at making AI-generated content sound more human and natural."
-          },
-          {
-            role: "user",
-            content: `Make this content sound more natural and human-like, while maintaining its professional tone: ${content}`
-          }
-        ],
-        temperature: 0.8,
-        max_tokens: 1000
-      });
-
-      content = humanizedCompletion.choices[0].message.content || content;
+    if (!content) {
+      throw new Error('No content generated');
     }
 
     // Track usage
-    await supabase
-      .from('usage')
-      .insert({
-        user_id: user.id,
-        type: 'ai_generation',
-        amount: 1,
-        metadata: {
-          content_type: type,
-          language,
-          humanized: humanize,
-        },
-      });
+    if (usage) {
+      await supabase
+        .from('subscription_usage')
+        .update({ 
+          used_amount: usage.used_amount + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('subscription_id', subscription?.id)
+        .eq('feature', 'ai_credits');
+    }
 
     // Store generation history
     await supabase
       .from('content_generations')
       .insert({
         user_id: user.id,
+        prompt: { topic, type, platform, tone },
         content,
         metadata: {
+          model: 'gpt-4',
+          platform,
           type,
-          topic,
-          industry,
-          keywords,
-          language,
-          humanized: humanize,
-        },
+          subscription_tier: subscription?.plans?.name || 'free'
+        }
       });
 
     return new Response(
       JSON.stringify({ content }),
-      {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      },
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
     );
   } catch (error) {
+    console.error('Generation error:', error);
+    
+    // Handle OpenAI API errors
+    if (error?.response?.status === 429) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+        { 
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Handle missing API key
+    if (error.message?.includes('API key')) {
+      return new Response(
+        JSON.stringify({ error: 'OpenAI API configuration error. Please contact support.' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 400,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      },
+      JSON.stringify({ error: error.message || 'Failed to generate content' }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
     );
   }
 });

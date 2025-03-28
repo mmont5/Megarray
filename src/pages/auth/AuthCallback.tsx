@@ -1,38 +1,40 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+import { toast } from 'sonner';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { updateUser } = useAuth();
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    if (token) {
-      localStorage.setItem('token', token);
-      // Fetch user data and update context
-      fetch('/api/auth/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then(res => res.json())
-        .then(data => {
-          updateUser(data.user);
-          navigate('/dashboard');
-        })
-        .catch(() => {
-          navigate('/login?error=auth_failed');
-        });
-    } else {
-      navigate('/login?error=no_token');
-    }
-  }, [searchParams, navigate, updateUser]);
+    const handleCallback = async () => {
+      try {
+        // Get the session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) throw error;
+        if (!session) throw new Error('No session found');
+
+        // Redirect to dashboard
+        navigate('/dashboard');
+        toast.success('Successfully signed in!');
+      } catch (error: any) {
+        console.error('Auth callback error:', error);
+        toast.error(error.message || 'Authentication failed');
+        navigate('/login');
+      }
+    };
+
+    handleCallback();
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00E5BE]"></div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00E5BE] mx-auto mb-4"></div>
+        <p className="text-gray-600">Completing authentication...</p>
+      </div>
     </div>
   );
 };

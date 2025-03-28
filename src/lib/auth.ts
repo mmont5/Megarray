@@ -13,6 +13,8 @@ export interface SignInData {
 
 export async function signUp({ email, password, name }: SignUpData) {
   try {
+    console.log('Attempting signup:', { email, name });
+    
     // Split name into first and last name
     const [firstName, ...lastNameParts] = name.trim().split(' ');
     const lastName = lastNameParts.join(' ');
@@ -29,7 +31,12 @@ export async function signUp({ email, password, name }: SignUpData) {
       },
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Signup error:', error);
+      throw error;
+    }
+
+    console.log('Signup successful:', data);
     return data;
   } catch (error) {
     console.error('Signup error:', error);
@@ -39,6 +46,8 @@ export async function signUp({ email, password, name }: SignUpData) {
 
 export async function signIn({ email, password }: SignInData) {
   try {
+    console.log('Attempting sign in:', { email });
+
     // First check if user exists in profiles
     const { data: existingUser, error: userError } = await supabase
       .from('profiles')
@@ -53,6 +62,7 @@ export async function signIn({ email, password }: SignInData) {
     }
 
     // Sign in with Supabase Auth
+    console.log('Calling supabase.auth.signInWithPassword');
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -64,11 +74,13 @@ export async function signIn({ email, password }: SignInData) {
     }
 
     if (!data.user) {
+      console.error('Login successful but no user data returned');
       throw new Error('Login successful but no user data returned');
     }
 
     // If we successfully logged in but no profile exists, create one
     if (!existingUser) {
+      console.log('Creating new profile for user:', data.user.id);
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -85,6 +97,7 @@ export async function signIn({ email, password }: SignInData) {
       }
     }
 
+    console.log('Login successful:', data);
     return data;
   } catch (error) {
     console.error('Login error:', error);

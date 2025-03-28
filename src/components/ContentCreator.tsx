@@ -1,138 +1,95 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Wand2, Brain, Search, Hash, TrendingUp, Loader2, CheckSquare } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Wand2, Brain, Loader2, Globe, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabase';
-
-interface Keyword {
-  keyword: string;
-  volume: number;
-  trending: boolean;
-}
-
-interface Hashtag {
-  tag: string;
-  volume: number;
-  trending: boolean;
-}
+import { useAuth } from '../contexts/AuthContext';
 
 const ContentCreator = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [topic, setTopic] = useState('');
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isLoadingKeywords, setIsLoadingKeywords] = useState(false);
-  const [keywords, setKeywords] = useState<Keyword[]>([]);
-  const [hashtags, setHashtags] = useState<Hashtag[]>([]);
-  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
-  const [selectedHashtags, setSelectedHashtags] = useState<string[]>([]);
   const [useAI, setUseAI] = useState(true);
-  
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const [contentType, setContentType] = useState('post');
+  const [platform, setPlatform] = useState('general');
+  const [tone, setTone] = useState('professional');
 
+  // Check authentication on mount and when user changes
   useEffect(() => {
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-
-    if (topic.trim().length >= 3) {
-      typingTimeoutRef.current = setTimeout(() => {
-        fetchTrendingData();
-      }, 1500);
-    }
-
-    return () => {
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/login', { state: { from: '/dashboard/content/create' } });
       }
     };
-  }, [topic]);
 
-  const fetchTrendingData = async () => {
-    if (!topic.trim()) {
-      console.warn('Topic is empty, skipping fetchTrendingData');
-      return;
-    }
-    
-    setIsLoadingKeywords(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('trending-keywords', {
-        body: { topic: topic.trim() },
-      });
-
-      if (error) {
-        console.error('Error fetching trending data:', error);
-        toast.error(`Failed to fetch trending data: ${error.message}`);
-        setKeywords([]);
-        setHashtags([]);
-        return;
-      }
-
-      if (!data?.keywords) {
-        console.warn('No keywords data received');
-        setKeywords([]);
-        setHashtags([]);
-        return;
-      }
-
-      // Process keywords and hashtags
-      const processedKeywords = data.keywords.filter((k: any) => !k.keyword.startsWith('#'));
-      const processedHashtags = data.keywords
-        .filter((k: any) => k.keyword.startsWith('#'))
-        .map((k: any) => ({
-          tag: k.keyword,
-          volume: k.volume,
-          trending: k.trending,
-        }));
-
-      setKeywords(processedKeywords);
-      setHashtags(processedHashtags);
-    } catch (error: any) {
-      console.error('Error fetching trending data:', error);
-      toast.error(error.message || 'Failed to fetch trending data');
-      setKeywords([]);
-      setHashtags([]);
-    } finally {
-      setIsLoadingKeywords(false);
-    }
-  };
-
-  const handleKeywordToggle = (keyword: string) => {
-    setSelectedKeywords(prev =>
-      prev.includes(keyword)
-        ? prev.filter(k => k !== keyword)
-        : [...prev, keyword]
-    );
-  };
-
-  const handleHashtagToggle = (hashtag: string) => {
-    setSelectedHashtags(prev =>
-      prev.includes(hashtag)
-        ? prev.filter(h => h !== hashtag)
-        : [...prev, hashtag]
-    );
-  };
+    checkAuth();
+  }, [user, navigate]);
 
   const handleGenerate = async () => {
+    if (!topic.trim()) {
+      toast.error('Please enter a topic');
+      return;
+    }
+
     setIsGenerating(true);
+
     try {
-      const { data, error } = await supabase.functions.invoke('generate', {
-        body: {
-          topic,
-          keywords: selectedKeywords,
-          hashtags: selectedHashtags,
+      // Get current session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        navigate('/login', { state: { from: '/dashboard/content/create' } });
+        throw new Error('Please log in to generate content');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          topic: topic.trim(),
+          type: contentType,
+          platform,
+          tone,
+        }),
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate content');
+      }
+
+      const data = await response.json();
+
+      if (!data?.content) {
+        throw new Error('No content received from generation service');
+      }
 
       setContent(data.content);
       toast.success('Content generated successfully!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Generation error:', error);
-      toast.error('Failed to generate content');
+      toast.error(error.message || 'Failed to generate content');
+      
+      if (error.message.includes('log in') || error.message.includes('Unauthorized')) {
+        navigate('/login', { state: { from: '/dashboard/content/create' } });
+      }
     } finally {
       setIsGenerating(false);
     }
   };
+
+  // If not authenticated, show loading state
+  if (!user) {
+    return <div className="flex items-center justify-center h-64">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00E5BE]"></div>
+    </div>;
+  }
 
   return (
     <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 space-y-6">
@@ -160,6 +117,62 @@ const ContentCreator = () => {
         </div>
       </div>
 
+      {/* Content Settings */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Content Type
+          </label>
+          <select
+            value={contentType}
+            onChange={(e) => setContentType(e.target.value)}
+            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
+          >
+            <option value="post">Social Post</option>
+            <option value="thread">Thread</option>
+            <option value="caption">Image Caption</option>
+            <option value="article">Article</option>
+            <option value="email">Email</option>
+            <option value="ad">Advertisement</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Platform
+          </label>
+          <select
+            value={platform}
+            onChange={(e) => setPlatform(e.target.value)}
+            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
+          >
+            <option value="general">General</option>
+            <option value="instagram">Instagram</option>
+            <option value="facebook">Facebook</option>
+            <option value="twitter">Twitter/X</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="tiktok">TikTok</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Tone
+          </label>
+          <select
+            value={tone}
+            onChange={(e) => setTone(e.target.value)}
+            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-[#00E5BE] focus:border-transparent"
+          >
+            <option value="professional">Professional</option>
+            <option value="casual">Casual</option>
+            <option value="friendly">Friendly</option>
+            <option value="humorous">Humorous</option>
+            <option value="formal">Formal</option>
+          </select>
+        </div>
+      </div>
+
       {/* Topic Input */}
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -174,106 +187,24 @@ const ContentCreator = () => {
         />
       </div>
 
-      {/* Loading indicator */}
-      {isLoadingKeywords && (
-        <div className="flex items-center justify-center py-4">
-          <Loader2 className="w-6 h-6 text-[#00E5BE] animate-spin" />
-          <span className="ml-2 text-gray-400">Finding trending keywords...</span>
-        </div>
-      )}
-
-      {/* Keywords */}
-      {keywords.length > 0 && (
-        <div>
-          <h4 className="text-lg font-medium text-white mb-4">Trending Keywords</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {keywords.map((keyword) => (
-              <button
-                key={keyword.keyword}
-                onClick={() => handleKeywordToggle(keyword.keyword)}
-                className={`flex items-center justify-between p-3 rounded-lg border ${
-                  selectedKeywords.includes(keyword.keyword)
-                    ? 'border-[#00E5BE] bg-[#00E5BE]/10'
-                    : 'border-gray-600 hover:border-[#00E5BE]'
-                } transition-colors duration-200`}
-              >
-                <div className="flex items-center space-x-2">
-                  <Search className="w-4 h-4 text-gray-400" />
-                  <span className="text-white">{keyword.keyword}</span>
-                  {keyword.trending && (
-                    <TrendingUp className="w-4 h-4 text-orange-500" />
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-400">
-                    {keyword.volume.toLocaleString()} searches
-                  </span>
-                  {selectedKeywords.includes(keyword.keyword) && (
-                    <CheckSquare className="w-4 h-4 text-[#00E5BE]" />
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Hashtags */}
-      {hashtags.length > 0 && (
-        <div>
-          <h4 className="text-lg font-medium text-white mb-4">Trending Hashtags</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {hashtags.map((hashtag) => (
-              <button
-                key={hashtag.tag}
-                onClick={() => handleHashtagToggle(hashtag.tag)}
-                className={`flex items-center justify-between p-3 rounded-lg border ${
-                  selectedHashtags.includes(hashtag.tag)
-                    ? 'border-[#00E5BE] bg-[#00E5BE]/10'
-                    : 'border-gray-600 hover:border-[#00E5BE]'
-                } transition-colors duration-200`}
-              >
-                <div className="flex items-center space-x-2">
-                  <Hash className="w-4 h-4 text-gray-400" />
-                  <span className="text-white">{hashtag.tag}</span>
-                  {hashtag.trending && (
-                    <TrendingUp className="w-4 h-4 text-orange-500" />
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-400">
-                    {hashtag.volume.toLocaleString()} posts
-                  </span>
-                  {selectedHashtags.includes(hashtag.tag) && (
-                    <CheckSquare className="w-4 h-4 text-[#00E5BE]" />
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Generate Button */}
-      {(selectedKeywords.length > 0 || selectedHashtags.length > 0) && (
-        <button
-          onClick={handleGenerate}
-          disabled={isGenerating}
-          className="w-full flex items-center justify-center px-4 py-2 bg-[#00E5BE] text-white rounded-lg hover:bg-[#00D1AD] disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Generating content...
-            </>
-          ) : (
-            <>
-              <Wand2 className="w-5 h-5 mr-2" />
-              Generate Content
-            </>
-          )}
-        </button>
-      )}
+      <button
+        onClick={handleGenerate}
+        disabled={isGenerating || !topic.trim()}
+        className="w-full flex items-center justify-center px-4 py-2 bg-[#00E5BE] text-white rounded-lg hover:bg-[#00D1AD] disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isGenerating ? (
+          <>
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            Generating content...
+          </>
+        ) : (
+          <>
+            <Wand2 className="w-5 h-5 mr-2" />
+            Generate Content
+          </>
+        )}
+      </button>
 
       {/* Generated Content */}
       {content && (
@@ -289,31 +220,11 @@ const ContentCreator = () => {
             />
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {selectedKeywords.map((keyword, index) => (
-              <span
-                key={index}
-                className="px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-sm"
-              >
-                {keyword}
-              </span>
-            ))}
-            {selectedHashtags.map((hashtag, index) => (
-              <span
-                key={index}
-                className="px-3 py-1 bg-[#00E5BE]/10 text-[#00E5BE] rounded-full text-sm"
-              >
-                {hashtag}
-              </span>
-            ))}
-          </div>
-
           <div className="flex space-x-4">
             <button
               onClick={() => {
                 setContent('');
-                setSelectedKeywords([]);
-                setSelectedHashtags([]);
+                setTopic('');
               }}
               className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
             >
