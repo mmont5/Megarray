@@ -47,7 +47,10 @@ const ContentCreator = () => {
   }, [topic]);
 
   const fetchTrendingData = async () => {
-    if (!topic.trim()) return;
+    if (!topic.trim()) {
+      console.warn('Topic is empty, skipping fetchTrendingData');
+      return;
+    }
     
     setIsLoadingKeywords(true);
     try {
@@ -56,12 +59,18 @@ const ContentCreator = () => {
       });
 
       if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(error.message || 'Failed to fetch trending data');
+        console.error('Error fetching trending data:', error);
+        toast.error(`Failed to fetch trending data: ${error.message}`);
+        setKeywords([]);
+        setHashtags([]);
+        return;
       }
 
-      if (!data || !data.keywords) {
-        throw new Error('Invalid response format');
+      if (!data?.keywords) {
+        console.warn('No keywords data received');
+        setKeywords([]);
+        setHashtags([]);
+        return;
       }
 
       // Process keywords and hashtags

@@ -1,13 +1,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.39.0';
-import { TwitterApi } from 'npm:twitter-api-v2@1.15.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-const X_BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAETw0AEAAAAAebapm0vcfH2mWUI%2F56McHkQjb%2BY%3DxkCWWyStbtZQ3GXjQUAP1TMKX5AJMdfHWpZnwQJvkJOU9L5SRL';
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -16,59 +13,75 @@ serve(async (req) => {
   }
 
   try {
-    // Validate request body
-    const body = await req.json().catch(() => ({}));
-    const { topic } = body;
-
-    if (!topic || typeof topic !== 'string') {
-      throw new Error('Invalid or missing topic parameter');
-    }
-
     // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
+    // Parse request body
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON body' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    const { topic } = body;
+
+    if (!topic || typeof topic !== 'string' || !topic.trim()) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid or missing topic parameter' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
-      throw new Error('Unauthorized');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized', details: authError?.message }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     // Get user's subscription tier
-    const { data: subscription, error: subError } = await supabase
+    const { data: subscription } = await supabase
       .from('subscriptions')
       .select('plans(name)')
       .eq('user_id', user.id)
       .eq('status', 'active')
       .maybeSingle();
 
-    if (subError && subError.code !== 'PGRST116') {
-      console.error('Subscription error:', subError);
-      throw new Error('Failed to verify subscription');
-    }
-
     // Determine keyword limit based on subscription
-    const keywordLimit = subscription?.plans?.name === 'free' ? 5 :
-                        subscription?.plans?.name === 'pro' ? 10 : 20;
-
-    // Initialize X API client
-    const xClient = new TwitterApi(X_BEARER_TOKEN);
+    const keywordLimit = subscription?.plans?.name === 'Free' ? 5 :
+                        subscription?.plans?.name === 'Pro' ? 10 : 20;
 
     // Generate trending data
-    // In production, replace with actual API calls to X, Google Trends, etc.
+    const normalizedTopic = topic.trim().toLowerCase();
     const keywords = [
-      { keyword: `${topic.toLowerCase()} tips`, volume: 1200, trending: true },
-      { keyword: `${topic.toLowerCase()} guide`, volume: 800, trending: false },
-      { keyword: `${topic.toLowerCase()} examples`, volume: 600, trending: true },
-      { keyword: `${topic.toLowerCase()} best practices`, volume: 500, trending: false },
-      { keyword: `${topic.toLowerCase()} tutorial`, volume: 450, trending: true },
-      { keyword: `${topic.toLowerCase()} tools`, volume: 400, trending: false },
-      { keyword: `#${topic.toLowerCase()}tips`, volume: 2500, trending: true },
-      { keyword: `#${topic.toLowerCase()}`, volume: 2000, trending: true },
-      { keyword: `#${topic.toLowerCase()}guide`, volume: 1500, trending: false },
-      { keyword: `#${topic.toLowerCase()}expert`, volume: 1200, trending: true },
+      { keyword: `${normalizedTopic} tips`, volume: 1200, trending: true },
+      { keyword: `${normalizedTopic} guide`, volume: 800, trending: false },
+      { keyword: `${normalizedTopic} examples`, volume: 600, trending: true },
+      { keyword: `${normalizedTopic} best practices`, volume: 500, trending: false },
+      { keyword: `${normalizedTopic} tutorial`, volume: 450, trending: true },
+      { keyword: `${normalizedTopic} tools`, volume: 400, trending: false },
+      { keyword: `#${normalizedTopic}tips`, volume: 2500, trending: true },
+      { keyword: `#${normalizedTopic}`, volume: 2000, trending: true },
+      { keyword: `#${normalizedTopic}guide`, volume: 1500, trending: false },
+      { keyword: `#${normalizedTopic}expert`, volume: 1200, trending: true },
     ];
 
     // Limit results based on subscription
@@ -92,29 +105,21 @@ serve(async (req) => {
         }
       }),
       {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
   } catch (error) {
     console.error('Trending keywords error:', error);
     
-    const status = error.message === 'Unauthorized' ? 401 :
-                  error.message === 'Invalid or missing topic parameter' ? 400 : 500;
-                  
     return new Response(
       JSON.stringify({
-        error: error.message,
-        details: status === 500 ? 'Internal server error' : error.message,
+        error: 'Internal server error',
+        details: error.message
       }),
-      {
-        status,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
   }
